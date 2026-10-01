@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xmlns="http://maven.apache.org/POM/4.0.0"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>com.zifang</groupId>
+        <artifactId>z-tool</artifactId>
+        <version>1.0.0-SNAPSHOT</version>
+        <relativePath>../pom.xml</relativePath>
+    </parent>
+
+    <artifactId>z-tool-curl</artifactId>
+    <packaging>jar</packaging>
+
+    <name>z-tool-curl</name>
+    <description>
+        z-tool-curl: 短链服务 (从 z-ctc 抽出)
+        - 短码生成 / 解析 / 失效
+        - 跳转 302 + 命中计数
+        - tenant 强制匹配
+    </description>
+
+    <properties>
+        <java.version>8</java.version>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    </properties>
+
+    <!-- 2026-09-28「同坐标单版本」：删掉整个 <dependencyManagement>。
+         四条(z-boot-web-starter / z-boot-datasource-starter / mybatis-plus-boot-starter /
+         mybatis-plus-annotation)都是根 pom 或 BOM 的逐条复制品，而其中
+         `mybatis-plus-annotation` 只写了坐标没写版本 —— 子 pom 的受管项是**覆盖**而不是补充，
+         这一条把 BOM 的 3.5.7 顶成了"无受管版本"，maven 直接报
+         'dependencies.dependency.version' for com.baomidou:mybatis-plus-annotation is missing。
+         同理这里下面的字面量也一并交给根/BOM。 -->
+
+    <dependencies>
+        <dependency>
+            <groupId>io.github.yuku123</groupId>
+            <artifactId>z-util-core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.github.yuku123</groupId>
+            <artifactId>z-boot-web-starter</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.github.yuku123</groupId>
+            <artifactId>z-boot-datasource-starter</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.baomidou</groupId>
+            <artifactId>mybatis-plus-boot-starter</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.baomidou</groupId>
+            <artifactId>mybatis-plus-annotation</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-autoconfigure</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.logging.log4j</groupId>
+            <artifactId>log4j-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <scope>provided</scope>
+        </dependency>
+    </dependencies>
+</project>

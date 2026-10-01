@@ -1,24 +1,171 @@
-# Compiled class file
+# ============================
+# Maven
+# ============================
+target/
+# 根目录不应有 META-INF (避免在根目录跑 mvn package 误生成)
+/META-INF/
+!.mvn/wrapper/maven-wrapper.jar
+!**/src/main/**/target/
+!**/src/test/**/target/
+pom.xml.tag
+pom.xml.releaseBackup
+pom.xml.versionsBackup
+pom.xml.next
+release.properties
+dependency-reduced-pom.xml
+buildNumber.properties
+.mvn/timing.properties
+.mvn/wrapper/maven-wrapper.jar
+
+# ============================
+# Java
+# ============================
 *.class
-
-# Log file
-*.log
-
-# BlueJ files
-*.ctxt
-
-# Mobile Tools for Java (J2ME)
-.mtj.tmp/
-
-# Package Files #
 *.jar
 *.war
-*.nar
 *.ear
 *.zip
 *.tar.gz
 *.rar
+*.flattened-pom.xml
+.flattened-pom.xml
+*.lst
 
-# virtual machine crash logs, see http://www.java.com/en/download/help/error_hotspot.xml
+# ============================
+# IDE
+# ============================
+## IntelliJ IDEA ##
+.idea/
+*.iws
+*.iml
+*.ipr
+.idea/modules.xml
+.idea/jarRepositories.xml
+.idea/compiler.xml
+.idea/libraries/
+out/
+
+## Eclipse ##
+.apt_generated
+.classpath
+.factorypath
+.project
+.settings
+.springBeans
+.sts4-cache
+bin/
+# 上面那条 bin/ 是 Eclipse 的输出约定, 但 z-opc 根 bin/ 是人写的运维脚本,
+# 而 z-team-indexer 的 src/**/resources/bin/ 是运行时释放的索引器资源
+# (IndexBuildService.java:54/:240 从 classpath 读), 两者必须随 clone 走
+!/bin/
+!**/src/main/**/bin/
+!**/src/test/**/bin/
+
+## NetBeans ##
+/nbproject/private/
+/nbbuild/
+/dist/
+/nbdist/
+/.nb-gradle/
+
+## VS Code ##
+.vscode/
+
+# ============================
+# Build (Gradle - 根目录 build/)
+# ============================
+/build/
+!**/src/main/**/build/
+!**/src/test/**/build/
+
+# _build/ 是项目约定的脚本/构建产物目录（_build/scripts/ 等需要追踪）
+# 不在这里忽略
+
+# ============================
+# Logs
+# ============================
+*.log
+logs/
+*/logs/
+# ============================
+# OS
+# ============================
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# ============================
+# Application
+# ============================
+*.pid
+*.pid.lock
+tmp/
+*.pid
+*.ctxt
+.mtj.tmp/
 hs_err_pid*
 replay_pid*
+HELP.md
+
+# ============================
+# Node.js
+# ============================
+**/node_modules/
+**/dist/
+**/.playwright-mcp
+
+# ============================
+# Database
+# ============================
+*/metastore_db
+*.bak
+
+# Binary node executables in frontend modules
+**/_frontend/node/node
+**/_frontend/node/*
+
+# ============================
+# z-mq 本地存储（运行时生成的 1GB MappedFile，绝不入仓）
+# ============================
+z-mq/**/~/
+**/store/
+# 上面那条是给 z-mq 运行时 MappedFile 加的, 但它顺带吞掉了前端人写的
+# src/zteam/pages/workspace/store/(11 个 .ts), 换机器 clone 就少一份源码
+!bootstraps/z-opc-main-starter-frontend/src/zteam/pages/workspace/store/
+**/storePath/
+**/commitlog/
+
+# git filter-repo 备份
+.git-rewrite/
+
+# swap files
+*.swp
+*.swo
+
+# OS
+.DS_Store
+
+
+
+# 个人 TODO 及其他私人内容
+_personal/
+
+# 另一个 Hermes agent workspace(避免与 .hermes/ 冲突)
+_hermes/
+
+# Python 编译缓存
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# 测试覆盖率产物（vitest / jest）
+coverage/
+
+# 环境变量 (敏感信息)
+.env
+.gnupg/
