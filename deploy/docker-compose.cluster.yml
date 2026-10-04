@@ -1,0 +1,99 @@
+# ============================================================================
+# Mode 3 · 集群（1 前端 + N 后端）
+#
+# 形态：单个 frontend nginx 做入口，upstream 里列 3 个 backend。
+# 适合：生产 / 多副本高可用 / 灰度发布
+#
+# 启动：make cluster
+#
+# 【为什么这里手写 3 个 backend 而不用 `docker compose up --scale backend=3`】
+# --scale 出来的副本没有稳定 DNS 名（backend-1/2/3 要靠 network alias 拼），
+# 而 nginx 的 upstream 是启动时静态展开的 —— 加副本必须重建前端容器。
+# 这里显式列死 3 个服务：想要 N 副本就改这一段，行为可预测、nginx 不用重建。
+#
+# 【生产真正的多副本走 k8s】
+# deploy/k8s/ 用 StatefulSet + Service，副本数改一个字段即可，不受上面这个限制。
+#
+# 【无状态性】后端无状态：短码状态在 MySQL，会话在请求里，不落本地磁盘。
+# 所以 3 个副本任意挂 1 个都不影响短链可用性。
+# ============================================================================
+
+name: z-surl-cluster
+
+x-backend-common: &backend-common
+  image: ${IMAGE_REPO:-zifang}/z-surl-admin:${VERSION:-1.0.0}
+  restart: unless-stopped
+  environment: &backend-env
+    SPRING_PROFILES_ACTIVE: ${ZSURL_PROFILE:-prod}
+    TZ: ${TZ:-Asia/Shanghai}
+    ZSURL_DB_HOST: ${ZSURL_DB_HOST:-host.docker.internal}
+    ZSURL_DB_PORT: ${ZSURL_DB_PORT:-3306}
+    ZSURL_DB_NAME: ${ZSURL_DB_NAME:-oc}
+    ZSURL_DB_USER: ${ZSURL_DB_USER:-root}
+    ZSURL_DB_PASSWORD: ${ZSURL_DB_PASSWORD:-}
+    JAVA_OPTS: ${JAVA_OPTS:--XX:MaxRAMPercentage=75 -XX:+UseSerialGC}
+  healthcheck:
+    test: ["CMD-SHELL", "curl -fsS http://127.0.0.1:8080/actuator/health | grep -q '\"status\":\"UP\"'"]
+    interval: 15s
+    timeout: 5s
+    retries: 5
+    start_period: 40s
+  networks:
+    - zsurl
+
+services:
+  backend-0:
+    <<: *backend-common
+    container_name: z-surl-backend-0
+    environment:
+      <<: *backend-env
+      # 启动日志打实例序号，方便在 3 个副本里认出这是哪个
+      INSTANCE_INDEX: "0"
+
+  backend-1:
+    <<: *backend-common
+    container_name: z-surl-backend-1
+    environment:
+      <<: *backend-env
+      INSTANCE_INDEX: "1"
+
+  backend-2:
+    <<: *backend-common
+    container_name: z-surl-backend-2
+    environment:
+      <<: *backend-env
+      INSTANCE_INDEX: "2"
+
+  frontend:
+    image: ${IMAGE_REPO:-zifang}/z-surl-frontend:${VERSION:-1.0.0}
+    container_name: z-surl-frontend
+    restart: unless-stopped
+    depends_on:
+      backend-0:
+        condition: service_healthy
+      backend-1:
+        condition: service_healthy
+      backend-2:
+        condition: service_healthy
+    ports:
+      - "${ZSURL_HTTP_PORT:-8088}:80"
+    environment:
+      # 一次给出三条 server，nginx 自己 round-robin。
+      # （不用 socat 之类的转发器"假装"负载均衡：socat TCP-LISTEN 指向的是固定目标，
+      #   看着有 3 个后端实际全打在 backend-0。）
+      ZSURL_BACKEND_UPSTREAM: >-
+        server backend-0:8080;
+        server backend-1:8080;
+        server backend-2:8080;
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q -O - http://127.0.0.1/healthz | grep -q ok"]
+      interval: 15s
+      timeout: 3s
+      retries: 3
+      start_period: 5s
+    networks:
+      - zsurl
+
+networks:
+  zsurl:
+    driver: bridge

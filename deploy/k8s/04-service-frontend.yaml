@@ -1,0 +1,17 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: z-surl-frontend
+  namespace: z-surl
+  labels:
+    app.kubernetes.io/name: z-surl
+    app.kubernetes.io/component: frontend
+spec:
+  type: ClusterIP
+  selector:
+    app.kubernetes.io/name: z-surl
+    app.kubernetes.io/component: frontend
+  ports:
+    - name: http
+      port: 80
+      targetPort: http

@@ -1,0 +1,62 @@
+# ============================================================================
+# Mode 1 · 合体（默认，单容器）
+#
+# 形态：z-surl-admin 一个容器，jar 主进程 + 内嵌前端 static/ 一起伺服。
+# 入口：http://<host>:8080
+#
+# 适合：试用 / PoC / 个人开发 / 中小团队（CORS 同源，无额外配置）
+#
+# 启动：
+#   cp env/.env.example env/.env   # 改数据库参数（凭证不�� Git）
+#   make dev                       # 构建镜像 + 起容器
+#
+# 另外两套：docker-compose.split.yml（Mode 2 分体）/ docker-compose.cluster.yml（Mode 3 集群）
+# ============================================================================
+
+name: z-surl
+
+services:
+  admin:
+    image: ${IMAGE_REPO:-zifang}/z-surl-admin:${VERSION:-1.0.0}
+    container_name: z-surl-admin
+    restart: unless-stopped
+
+    ports:
+      # 宿主机端口可改；容器内固定 8080（与 application.yml / Dockerfile EXPOSE 一致）
+      - "${ZSURL_HTTP_PORT:-8080}:8080"
+
+    environment:
+      # Spring profile：prod 走 z.base.db.surl.* 连真实 MySQL；
+      # 改成 dev 会用 H2 内存库（重启即丢数据，勿用于生产）
+      SPRING_PROFILES_ACTIVE: ${ZSURL_PROFILE:-prod}
+      TZ: ${TZ:-Asia/Shanghai}
+
+      # z-base-datasource-starter 的 ModuleDataSourceTemplate 只认这 5 个键
+      # （它自己拼 jdbc:mysql://{host}:{port}/{database}，**没有 url 选项**）
+      ZSURL_DB_HOST: ${ZSURL_DB_HOST:-127.0.0.1}
+      ZSURL_DB_PORT: ${ZSURL_DB_PORT:-3306}
+      ZSURL_DB_NAME: ${ZSURL_DB_NAME:-oc}
+      ZSURL_DB_USER: ${ZSURL_DB_USER:-root}
+      # 凭证从 env/.env 注入，这里只做透传；默认值留空 —— 空密码连不上会立刻失败，
+      # 好过拿一个猜的密码在生产上反复试
+      ZSURL_DB_PASSWORD: ${ZSURL_DB_PASSWORD:-}
+
+      # MySQL 容器不在本 compose 里时用 host.docker.internal 走宿主机；
+      # 同机跑 MySQL 容器则改成该服务名（如 mysql）
+      JAVA_OPTS: ${JAVA_OPTS:--XX:MaxRAMPercentage=75 -XX:+UseSerialGC}
+
+    healthcheck:
+      # 探针打 actuator health：DB 不可达时它会 DOWN，编排层据此重启/摘流量。
+      # 不用 /api/ctc/surl/info —— 那是业务接口，且无参调用会因缺参返回 400，
+      # 探针会把"参数缺失"误判成"服务不健康"。
+      test: ["CMD-SHELL", "curl -fsS http://127.0.0.1:8080/actuator/health | grep -q '\"status\":\"UP\"'"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 40s
+
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"

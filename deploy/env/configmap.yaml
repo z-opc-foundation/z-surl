@@ -1,0 +1,24 @@
+# ============================================================================
+# z-surl k8s ConfigMap（非敏感配置）
+#
+# 凭证**不在这里** —— 走 k8s/06-secret.example.yaml（Secret）或外部密钥管理。
+# 理由：ConfigMap 明文存在 etcd 且可被同 namespace 任意 Pod 读取，
+# 放密码进去等于"没有权限控制"（008_组织规范/001_凭证管理规范.md）。
+# ============================================================================
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: z-surl-config
+  namespace: z-surl
+  labels:
+    app.kubernetes.io/name: z-surl
+    app.kubernetes.io/component: backend
+data:
+  SPRING_PROFILES_ACTIVE: "prod"
+  TZ: "Asia/Shanghai"
+
+  # 与 ModuleDataSourceTemplate 读取的键一一对应（z.base.db.surl.* ← ZSURL_DB_*）
+  ZSURL_DB_HOST: "host.docker.internal"
+  ZSURL_DB_PORT: "3306"
+  ZSURL_DB_NAME: "oc"
+  ZSURL_DB_USER: "root"

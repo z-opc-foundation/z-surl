@@ -1,0 +1,40 @@
+# ============================================================================
+# z-surl 后端镜像（基于 z-surl-admin 的 exec jar）
+#
+# 构建上下文是**仓根**（不是 deploy/），因为要 COPY 仓内模块的 target 产物：
+#     docker build -f deploy/Dockerfile.backend -t z-surl-admin:1.0.0 .
+#
+# 【两种模式的差别只在"前端有没有进 jar"】
+#   Mode 1 合体：mvn package 时 _frontend/z-surl-frontend/dist 已被拷进
+#                BOOT-INF/classes/static/，本镜像单容器自带控制台。
+#   Mode 2/3 分体：jar 里那份 static 不碍事（后端不会去伺服它，前端由 nginx 出），
+#                  但如果你要求镜像里**确实没有** static，用
+#                  `mvn -pl z-surl-admin -am package -Dmaven.resources.skip=true`
+#                  或构建后删掉 static/ 目录再 build 镜像。
+# ============================================================================
+
+# eclipse-temurin 8 JRE —— 与本仓 Java 8 字节码目标一致（001_技术栈全景：88% pom 声明 Java 8）
+FROM eclipse-temurin:8-jre-jammy
+
+ARG VERSION=1.0.0
+LABEL org.opencontainers.image.title="z-surl-admin" \
+      org.opencontainers.image.description="z-surl 短网址服务 admin（Spring Boot 单体）" \
+      org.opencontainers.image.version="${VERSION}"
+
+# 以非 root 运行（Docker 官方镜像的通行做法；容器逃逸时权限面更小）
+RUN groupadd -r zsurl && useradd -r -g zsurl -d /app -s /sbin/nologin zsurl
+
+WORKDIR /app
+COPY --chown=zsurl:zsurl z-surl-admin/target/z-surl-admin-${VERSION}-exec.jar app.jar
+
+USER zsurl
+EXPOSE 8080
+
+ENV TZ=Asia/Shanghai \
+    SPRING_PROFILES_ACTIVE=prod \
+    JAVA_OPTS="-XX:MaxRAMPercentage=75 -XX:+UseSerialGC -Djava.security.egd=file:/dev/./urandom"
+
+# 用 exec 形式直接跑 jar：这样 java 是 PID 1，能收到 SIGTERM 触发优雅停机。
+# 写成 `CMD app.jar`（shell 形式）会让 java 变成 sh 的子进程，docker stop 时
+# 收不到 SIGTERM，只能等 10s 超时强杀 —— 正在处理的跳转请求会被硬切。
+ENTRYPOINT ["sh", "-c", "exec java $JAVA_OPTS -jar /app/app.jar"]

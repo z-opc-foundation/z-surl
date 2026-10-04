@@ -1,73 +1,256 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xmlns="http://maven.apache.org/POM/4.0.0"
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
+    <!--
+        消费入口统一走 z-boot-parent（1.0.19 起全组织口径，试点 z-cache）：一行 parent 白拿第三方
+        地板 z-boot-dependencies + 兄弟仓权威 z-boot-fleet + Java 8 的 pluginManagement。
+        迁移前本仓没有 parent，根 pom 是一份 com.zifang:z-tool:1.0.0-SNAPSHOT + <relativePath>../pom.xml</relativePath>，
+        而 org 根**没有 pom.xml**（实测 `ls z-opc-foundation/pom.xml` = No such file or directory），
+        那份 parent 只躺在本机 ~/.m2 —— 换台机器连 pom 都读不动，"源码能被别人构建"这件事是假的。
+        relativePath 必须留空：parent 不在磁盘上，在 repo1。
+    -->
     <parent>
-        <groupId>com.zifang</groupId>
-        <artifactId>z-tool</artifactId>
-        <version>1.0.0-SNAPSHOT</version>
-        <relativePath>../pom.xml</relativePath>
+        <groupId>io.github.yuku123</groupId>
+        <artifactId>z-boot-parent</artifactId>
+        <version>1.0.21</version>
+        <relativePath/>
     </parent>
 
-    <artifactId>z-tool-curl</artifactId>
-    <packaging>jar</packaging>
+    <groupId>io.github.yuku123</groupId>
+    <artifactId>z-surl</artifactId>
+    <version>${revision}</version>
+    <packaging>pom</packaging>
 
-    <name>z-tool-curl</name>
+    <!--
+        模块结构照 006_整体架构与新仓接入.md §3 的 L3 标准：
+          - z-surl-core     : DO / Mapper / DbService / SurlService（业务方不直接 import）
+          - z-surl-starter  : 业务方 import 的唯一入口（@AutoConfiguration + Controller + DTO）
+          - z-surl-admin    : 最小可启动单体（留 reactor，maven.deploy.skip=true，不上 Central）
+        两个 npm 项目（_frontend/）不进 reactor：纯 npm 产物，不需要 Maven 介入。
+    -->
+    <modules>
+        <module>z-surl-core</module>
+        <module>z-surl-starter</module>
+        <module>z-surl-admin</module>
+    </modules>
+
+    <name>z-surl (Short URL Service)</name>
     <description>
-        z-tool-curl: 短链服务 (从 z-ctc 抽出)
-        - 短码生成 / 解析 / 失效
-        - 跳转 302 + 命中计数
-        - tenant 强制匹配
+        Z-SURL: 短网址服务 —— 短码生成 / 解析 / 命中统计 / 失效。
+        Spring Boot Starter 一行集成，自带独立数据源（z.base.db.surl.*）与管理控制台。
     </description>
+    <url>https://github.com/z-opc-foundation/z-surl</url>
+    <licenses>
+        <license>
+            <name>MIT License</name>
+            <url>https://opensource.org/licenses/MIT</url>
+            <distribution>repo</distribution>
+        </license>
+    </licenses>
+    <!--
+        这一格必须自报：常开 flatten(oss) 会把**父链**的 url/scm/description 原样抄进每一份发布 pom，
+        实测回读到的是 z-boot 自己的描述和把 parent 链拼进路径的假地址。id/email 与本组织已上中央的
+        26 个仓逐字一致。
+    -->
+    <developers>
+        <developer>
+            <id>yuku123</id>
+            <name>yuku123</name>
+            <email>1340947819@qq.com</email>
+            <organization>z-opc-foundation</organization>
+            <organizationUrl>https://github.com/z-opc-foundation</organizationUrl>
+            <timezone>+08:00</timezone>
+            <roles>
+                <role>owner</role>
+            </roles>
+        </developer>
+    </developers>
+    <scm>
+        <connection>scm:git:https://github.com/z-opc-foundation/z-surl.git</connection>
+        <developerConnection>scm:git:ssh://git@github.com:z-opc-foundation/z-surl.git</developerConnection>
+        <url>https://github.com/z-opc-foundation/z-surl</url>
+        <tag>HEAD</tag>
+    </scm>
 
     <properties>
-        <java.version>8</java.version>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <!--
+            只留 CI-friendly 版本根（发版改这一处即可，配下方常开 flatten(oss)，入库/发布件里落成字面量）。
+            java.version / maven.compiler.source|target / project.build.sourceEncoding / flatten 插件版本
+            全部由 parent 下发且面值一致 ⇒ 迁移前那份自带的 <properties> 整块删掉，不做"两处同名键"。
+        -->
+        <revision>1.0.0</revision>
     </properties>
 
-    <!-- 2026-09-28「同坐标单版本」：删掉整个 <dependencyManagement>。
-         四条(z-boot-web-starter / z-boot-datasource-starter / mybatis-plus-boot-starter /
-         mybatis-plus-annotation)都是根 pom 或 BOM 的逐条复制品，而其中
-         `mybatis-plus-annotation` 只写了坐标没写版本 —— 子 pom 的受管项是**覆盖**而不是补充，
-         这一条把 BOM 的 3.5.7 顶成了"无受管版本"，maven 直接报
-         'dependencies.dependency.version' for com.baomidou:mybatis-plus-annotation is missing。
-         同理这里下面的字面量也一并交给根/BOM。 -->
+    <dependencyManagement>
+        <dependencies>
+            <!--
+                自家 2 格必须钉 ${project.version}。这一格不是装饰：fleet 里 z-surl 那一格钉的是
+                repo1 上的面值，而继承来的 DM 会**改写传递依赖的版本** ⇒ 不写就会把别人版本的
+                z-surl-core 字节码打进本仓的包里（z-cache 1.3.6 实测踩过：shade jar 里是 1.3.5 的
+                z-cache-common）。child 的 DM 压过 parent 的，tree 与产物才回到 1.0.0。
+            -->
+            <dependency>
+                <groupId>io.github.yuku123</groupId>
+                <artifactId>z-surl-core</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.github.yuku123</groupId>
+                <artifactId>z-surl-starter</artifactId>
+                <version>${project.version}</version>
+            </dependency>
 
-    <dependencies>
-        <dependency>
-            <groupId>io.github.yuku123</groupId>
-            <artifactId>z-util-core</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>io.github.yuku123</groupId>
-            <artifactId>z-boot-web-starter</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>io.github.yuku123</groupId>
-            <artifactId>z-boot-datasource-starter</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.baomidou</groupId>
-            <artifactId>mybatis-plus-boot-starter</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.baomidou</groupId>
-            <artifactId>mybatis-plus-annotation</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-autoconfigure</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.logging.log4j</groupId>
-            <artifactId>log4j-api</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.projectlombok</groupId>
-            <artifactId>lombok</artifactId>
-            <scope>provided</scope>
-        </dependency>
-    </dependencies>
+            <!--
+                L2 聚合 starter 必须显式写 version：z-boot-dependencies **不管理** starter
+                （007 踩坑 #3），只写坐标会解析报 `No version specified`。
+                ${z-boot.version} = 1.0.21 由 parent 的 properties 供，本仓不重复声明。
+            -->
+            <dependency>
+                <groupId>io.github.yuku123</groupId>
+                <artifactId>z-boot-web-starter</artifactId>
+                <version>${z-boot.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.github.yuku123</groupId>
+                <artifactId>z-boot-datasource-starter</artifactId>
+                <version>${z-boot.version}</version>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+
+    <build>
+        <plugins>
+            <!--
+                parent 把 flatten 放在 <build><plugins> 且标了 <inherited>false</inherited>：
+                既没进 pluginManagement 就不给子模块供版本，也不往下传 ⇒ 这里必须自己写
+                <version>，否则 mvn 直接报 "Error resolving version for plugin"。
+                版本号仍引用 parent 的 ${flatten-maven-plugin.version}（properties 是继承的），
+                不在本仓钉字面量，保持"版本单一来源"。
+                mode 必须覆盖成 oss：parent 那份是 resolveCiFriendliesOnly（"父已在 Central、
+                子跟着发"的模式），会把 ${revision} 原样留在发布件里，Central 报
+                `Dependency version information is missing`。
+            -->
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>flatten-maven-plugin</artifactId>
+                <version>${flatten-maven-plugin.version}</version>
+                <configuration>
+                    <updatePomFile>true</updatePomFile>
+                    <flattenMode>oss</flattenMode>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>flatten</id>
+                        <phase>process-resources</phase>
+                        <goals>
+                            <goal>flatten</goal>
+                        </goals>
+                    </execution>
+                    <execution>
+                        <id>flatten.clean</id>
+                        <phase>clean</phase>
+                        <goals>
+                            <goal>clean</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+
+    <!--
+        central profile 与 004_flatten_maven_plugin_模式选择.md §2 的标准配置逐格一致
+        （source 3.3.0 / javadoc 3.11.2 / gpg 3.2.7 / central-publishing 0.7.0）。
+    -->
+    <profiles>
+        <profile>
+            <id>central</id>
+            <properties>
+                <maven.javadoc.skip>false</maven.javadoc.skip>
+                <central.gpg.skip>false</central.gpg.skip>
+            </properties>
+            <distributionManagement>
+                <repository>
+                    <id>central</id>
+                    <url>https://central.sonatype.com</url>
+                </repository>
+            </distributionManagement>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-source-plugin</artifactId>
+                        <version>3.3.0</version>
+                        <executions>
+                            <execution>
+                                <id>attach-sources</id>
+                                <goals>
+                                    <goal>jar-no-fork</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-javadoc-plugin</artifactId>
+                        <version>3.11.2</version>
+                        <configuration>
+                            <doclint>none</doclint>
+                            <failOnError>false</failOnError>
+                            <failOnWarnings>false</failOnWarnings>
+                            <quiet>true</quiet>
+                        </configuration>
+                        <executions>
+                            <execution>
+                                <id>attach-javadocs</id>
+                                <phase>verify</phase>
+                                <goals>
+                                    <goal>jar</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-gpg-plugin</artifactId>
+                        <version>3.2.7</version>
+                        <configuration>
+                            <skip>${central.gpg.skip}</skip>
+                            <gpgArguments>
+                                <arg>--pinentry-mode</arg>
+                                <arg>loopback</arg>
+                                <arg>--no-tty</arg>
+                            </gpgArguments>
+                        </configuration>
+                        <executions>
+                            <execution>
+                                <id>sign-artifacts</id>
+                                <phase>verify</phase>
+                                <goals>
+                                    <goal>sign</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.sonatype.central</groupId>
+                        <artifactId>central-publishing-maven-plugin</artifactId>
+                        <version>0.7.0</version>
+                        <extensions>true</extensions>
+                        <configuration>
+                            <publishingServerId>central</publishingServerId>
+                            <tokenAuth>true</tokenAuth>
+                            <autoPublish>true</autoPublish>
+                            <waitUntil>uploaded</waitUntil>
+                            <waitMaxTime>1800</waitMaxTime>
+                            <waitPollingInterval>10</waitPollingInterval>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
 </project>

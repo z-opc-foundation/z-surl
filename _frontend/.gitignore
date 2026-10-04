@@ -1,0 +1,10 @@
+# _frontend 容器目录统管：两个子 npm 项目共享
+node_modules/
+dist/
+.node/
+*.tgz
+
+# 本地覆盖的 env（凭证不入 Git，008_组织规范/001_凭证管理规范.md）
+.env
+.env.local
+.env.*.local

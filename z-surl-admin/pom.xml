@@ -1,0 +1,179 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>io.github.yuku123</groupId>
+        <artifactId>z-surl</artifactId>
+        <version>${revision}</version>
+    </parent>
+
+    <artifactId>z-surl-admin</artifactId>
+    <version>${revision}</version>
+    <packaging>jar</packaging>
+
+    <!--
+        admin 是 standalone demo + docker 镜像源，**永远不上 Maven Central**（005 规范 §2 判据三条全中：
+        含 mainClass + repackage / name 与 description 含 admin / 无反向 import 路径）。
+        保留在 reactor 以享受统一构建，deploy 阶段自动跳过。
+        ⇒ 按 §2.4，这里**不写** url/licenses/developers/scm 四元信息（不 deploy 就不需要，
+           写两份反而要同步维护）。
+    -->
+    <name>z-surl-admin</name>
+    <description>z-surl admin 入口：独立可启动 Spring Boot 单体（z-surl-admin-*-exec.jar），内嵌前端 dist，供 Docker / k8s 部署</description>
+
+    <properties>
+        <maven.deploy.skip>true</maven.deploy.skip>
+        <!-- admin 的 context-path 与前端 vite base 必须一致（007 踩坑 #19：两边不一致会全站 404/502） -->
+        <surl.admin.context-path>/</surl.admin.context-path>
+    </properties>
+
+    <dependencies>
+        <dependency>
+            <groupId>io.github.yuku123</groupId>
+            <artifactId>z-surl-starter</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-web</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-validation</artifactId>
+        </dependency>
+        <!--
+            actuator：compose 的 healthcheck 与 k8s 的 startup/readiness/liveness 探针
+            都打 /actuator/health。少了它探针会一直失败 —— 表现为容器永远 unhealthy
+            （Mode 2/3 里 depends_on: service_healthy 直接卡住不启动）。
+            端点已在 application.yml 里收敛为 health,info 两个。
+        -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-actuator</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.logging.log4j</groupId>
+            <artifactId>log4j-core</artifactId>
+        </dependency>
+
+        <!-- dev profile 一键启动：H2 内存库 + schema.sql，不依赖 MySQL（见 src/test 外的 dev 资源） -->
+        <dependency>
+            <groupId>com.h2database</groupId>
+            <artifactId>h2</artifactId>
+            <scope>runtime</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter</artifactId>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <plugins>
+            <!--
+                前端注入（Mode 1 合体的关键）：把 _frontend/z-surl-frontend/dist 拷进 jar 的
+                BOOT-INF/classes/static/，java -jar 单容器即带控制台。
+                这一格**不联网**，前端由 `deploy/Makefile` 的 `make dev` 用系统 node 先跑
+                `npm run build`（组织惯例：走 npmmirror 源，见 _frontend/.npmrc）。
+            -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-resources-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>copy-frontend-dist</id>
+                        <phase>process-resources</phase>
+                        <goals>
+                            <goal>copy-resources</goal>
+                        </goals>
+                        <configuration>
+                            <outputDirectory>${project.build.outputDirectory}/static</outputDirectory>
+                            <resources>
+                                <resource>
+                                    <directory>${project.basedir}/../_frontend/z-surl-frontend/dist</directory>
+                                    <filtering>false</filtering>
+                                </resource>
+                            </resources>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <plugin>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
+                <configuration>
+                    <mainClass>com.zifang.z.surl.admin.SurlAdminApplication</mainClass>
+                    <!-- classifier=exec ⇒ 产物 z-surl-admin-{ver}-exec.jar，与 deploy/ 脚本和 Makefile 对齐 -->
+                    <classifier>exec</classifier>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>repackage</id>
+                        <goals>
+                            <goal>repackage</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+
+    <profiles>
+        <!--
+            -Pfrontend：由 Maven 驱动前端构建（CI / 有外网的环境用）。
+            frontend-maven-plugin 需要从 nodejs.org 下载 node 发行包，**离线环境会失败**，
+            所以不进默认构建：本地/CI 无网时走 `make dev`（系统 node + npmmirror 源），
+            效果等价且不依赖 nodejs.org 可达性。
+        -->
+        <profile>
+            <id>frontend</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>com.github.eirslett</groupId>
+                        <artifactId>frontend-maven-plugin</artifactId>
+                        <version>1.15.0</version>
+                        <configuration>
+                            <workingDirectory>${project.basedir}/../_frontend/z-surl-frontend</workingDirectory>
+                            <installDirectory>${project.basedir}/../_frontend/.node</installDirectory>
+                        </configuration>
+                        <executions>
+                            <execution>
+                                <id>install-node-and-npm</id>
+                                <goals>
+                                    <goal>install-node-and-npm</goal>
+                                </goals>
+                                <configuration>
+                                    <nodeVersion>v20.18.0</nodeVersion>
+                                </configuration>
+                            </execution>
+                            <execution>
+                                <id>npm-install</id>
+                                <goals>
+                                    <goal>npm</goal>
+                                </goals>
+                                <configuration>
+                                    <arguments>install --install-links</arguments>
+                                </configuration>
+                            </execution>
+                            <execution>
+                                <id>npm-build</id>
+                                <goals>
+                                    <goal>npm</goal>
+                                </goals>
+                                <configuration>
+                                    <arguments>run build</arguments>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
+</project>

@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>io.github.yuku123</groupId>
+        <artifactId>z-surl</artifactId>
+        <version>${revision}</version>
+    </parent>
+
+    <artifactId>z-surl-core</artifactId>
+    <version>${revision}</version>
+    <packaging>jar</packaging>
+
+    <!--
+        4 元信息必须自带：Central Portal 不跨 parent 继承子模块元信息，漏一个就 publish FAILED
+        （报错如 `Project name is missing` / `URL missing`）。见 004_flatten_maven_plugin_模式选择.md §3
+        与 007_业务仓到z_boot家族标准对齐.md 踩坑 #4。
+    -->
+    <name>z-surl-core</name>
+    <description>z-surl core 模块：短链领域层 —— SurlMappingDO + Mapper + SurlDbService + SurlService（数据 + 业务，不含 Web）</description>
+    <url>https://github.com/z-opc-foundation/z-surl</url>
+    <licenses>
+        <license>
+            <name>MIT License</name>
+            <url>https://opensource.org/licenses/MIT</url>
+            <distribution>repo</distribution>
+        </license>
+    </licenses>
+    <developers>
+        <developer>
+            <id>yuku123</id>
+            <name>yuku123</name>
+            <email>1340947819@qq.com</email>
+            <organization>z-opc-foundation</organization>
+            <organizationUrl>https://github.com/z-opc-foundation</organizationUrl>
+            <timezone>+08:00</timezone>
+            <roles>
+                <role>owner</role>
+            </roles>
+        </developer>
+    </developers>
+    <scm>
+        <connection>scm:git:https://github.com/z-opc-foundation/z-surl.git</connection>
+        <developerConnection>scm:git:ssh://git@github.com:z-opc-foundation/z-surl.git</developerConnection>
+        <url>https://github.com/z-opc-foundation/z-surl</url>
+        <tag>HEAD</tag>
+    </scm>
+
+    <dependencies>
+        <!-- MyBatis-Plus 注解（@TableName / @TableId / @TableField），版本由 z-boot-dependencies 地板锁 3.5.7 -->
+        <dependency>
+            <groupId>com.baomidou</groupId>
+            <artifactId>mybatis-plus-annotation</artifactId>
+        </dependency>
+        <!-- BaseMapper / QueryWrapper -->
+        <dependency>
+            <groupId>com.baomidou</groupId>
+            <artifactId>mybatis-plus-core</artifactId>
+        </dependency>
+
+        <!-- @Service / @Repository：core 只声明注解，运行期由 starter 的 web 环境提供 ⇒ provided -->
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-context</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <!-- @Transactional -->
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-tx</artifactId>
+            <scope>provided</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.apache.logging.log4j</groupId>
+            <artifactId>log4j-api</artifactId>
+        </dependency>
+
+        <!-- 单测：JDK 5 + JDK 动态代理，0 Mockito / 0 DB / 0 @SpringBootTest（见 007 步骤 8） -->
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <!--
+            log4j-core 只在测试期要：core 里只引了 log4j-api，测试跑起来会打
+            "ERROR Log4j API could not find a logging provider" —— 那行是 ERROR 级，
+            看的人会误以为测试挂了。运行期由 admin / 业务方提供实现。
+        -->
+        <dependency>
+            <groupId>org.apache.logging.log4j</groupId>
+            <artifactId>log4j-core</artifactId>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+</project>

@@ -1,0 +1,72 @@
+# ============================================================================
+# 前端 nginx Deployment
+#
+# replicas=1 即可：前端无状态，且它只做静态资源 + 反代，水平扩它没有意义
+# （005 规范 §4.3 "前端无状态：Deployment replicas=1 即可（前端不感知后端有几个副本）"）。
+#
+# 真正的弹性在后端 StatefulSet 上 —— 前端通过 ClusterIP Service 访问后端，
+# 后端副本数随便改，前端不用重启。
+# ============================================================================
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: z-surl-frontend
+  namespace: z-surl
+  labels:
+    app.kubernetes.io/name: z-surl
+    app.kubernetes.io/component: frontend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: z-surl
+      app.kubernetes.io/component: frontend
+  strategy:
+    # 滚动更新时先起新的再停旧的：z-surl 是短链服务，停机窗口要尽量短
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 0
+      maxSurge: 1
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: z-surl
+        app.kubernetes.io/component: frontend
+    spec:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 101
+        fsGroup: 101
+      containers:
+        - name: frontend
+          image: 192.168.31.250:5000/zifang/z-surl-frontend:1.0.0
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: http
+              containerPort: 80
+          env:
+            # k8s 里后端由 ClusterIP Service 的 DNS 解析，nginx 单条 server 即可
+            # （ClusterIP 自己在多副本间 round-robin，不需要像 compose 那样列多行）
+            - name: ZSURL_BACKEND_UPSTREAM
+              value: "server z-surl-backend:8080;"
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: http
+            periodSeconds: 20
+          readinessProbe:
+            httpGet:
+              path: /healthz
+              port: http
+            periodSeconds: 10
+          resources:
+            requests:
+              cpu: "20m"
+              memory: "64Mi"
+            limits:
+              cpu: "200m"
+              memory: "256Mi"
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop: ["ALL"]

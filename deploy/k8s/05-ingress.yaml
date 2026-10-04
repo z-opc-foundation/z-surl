@@ -1,0 +1,52 @@
+# ============================================================================
+# Ingress
+#
+# 【路径分工】
+#   /  与  /assets/  → 前端（静态资源 + SPA 回退）
+#   /api/**  与  /s/  → 后端
+#
+# 【为什么短链跳转面 /s/ 也要走 Ingress 而不是只暴露前端】
+# 短链是**对外**的入口，用户的浏览器直接访问 /s/Ab12Cd34。走 Ingress 的好处是
+# /s/ 和 /api/ 同源 —— 前端页面里 fetch('/api/...') 不会撞跨域，也不用额外配 CORS。
+#
+# host 改成实际域名；nginx ingress 注解按实际集群的 controller 调整
+# （本文件按 ingress-nginx 写，其它 controller 的注解名不同）。
+# ============================================================================
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: z-surl
+  namespace: z-surl
+  labels:
+    app.kubernetes.io/name: z-surl
+  annotations:
+    # 短链跳转是 302，禁止缓存：短码失效后不该被浏览器/CDN 继续用旧 Location
+    nginx.ingress.kubernetes.io/configuration-snippet: |
+      more_set_headers "Cache-Control: no-store";
+spec:
+  ingressClassName: nginx
+  rules:
+    - host: surl.opc.zopc.top
+      http:
+        paths:
+          - path: /api
+            pathType: Prefix
+            backend:
+              service:
+                name: z-surl-backend
+                port:
+                  name: http
+          - path: /s
+            pathType: Prefix
+            backend:
+              service:
+                name: z-surl-backend
+                port:
+                  name: http
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: z-surl-frontend
+                port:
+                  name: http

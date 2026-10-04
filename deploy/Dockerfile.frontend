@@ -1,0 +1,35 @@
+# ============================================================================
+# z-surl 前端镜像（独立 nginx，用于 Mode 2 分体 / Mode 3 集群）
+#
+# 与 Mode 1 的关系：Mode 1 把前端打进后端 jar（单容器），本文件是"前端要独立演进/
+# 独立扩缩容/CDN 缓存"时的形态（005 规范 §4.2）。
+#
+# 构建上下文是**仓根**（与 Dockerfile.backend 一致）：
+#     cd _frontend/z-surl-frontend && npm run build
+#     docker build -f deploy/Dockerfile.frontend -t z-surl-frontend:1.0.0 .
+#
+# 【注意】不能把上下文设成 _frontend/z-surl-frontend/ —— 那样 COPY 不到
+# nginx.conf.template（它在 deploy/ 下，写 ../nginx.conf.template 会报
+# "forbidden path outside the build context"）。两个 Dockerfile 用同一个上下文，
+# Makefile 里也就只需要一个 BUILD_CTX 变量。
+# ============================================================================
+
+FROM nginx:1.25-alpine
+
+ARG VERSION=1.0.0
+LABEL org.opencontainers.image.title="z-surl-frontend" \
+      org.opencontainers.image.version="${VERSION}"
+
+# ZSURL_BACKEND_UPSTREAM 由 compose / k8s 注入（nginx 官方镜像的 envsubst 机制
+# 在启动时展开模板）。内容是**一整段** upstream server 声明，例：
+#   Mode 2: "server backend:8080;"
+#   Mode 3: "server backend-0:8080; server backend-1:8080; server backend-2:8080;"
+ENV ZSURL_BACKEND_UPSTREAM="server backend:8080;"
+
+COPY --chown=nginx:nginx _frontend/z-surl-frontend/dist/ /usr/share/nginx/html/
+COPY --chown=nginx:nginx deploy/nginx.conf.template /etc/nginx/templates/default.conf.template
+
+EXPOSE 80
+
+# nginx 官方镜像会把 /etc/nginx/templates/*.template 渲染到 /etc/nginx/conf.d/，
+# ${BACKEND_SERVICE} / ${BACKEND_PORT} 在这里被 envsubst 替换。

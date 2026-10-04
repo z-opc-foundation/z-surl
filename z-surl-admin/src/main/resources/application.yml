@@ -1,0 +1,62 @@
+server:
+  # 与 README / Dockerfile EXPOSE / k8s targetPort 保持同值（007 踩坑 #19：四处不一致会全站 502）
+  port: 8080
+  servlet:
+    context-path: /
+
+spring:
+  application:
+    name: z-surl-admin
+  profiles:
+    active: ${ZSURL_PROFILE:prod}
+  jackson:
+    default-property-inclusion: non_null
+    date-format: yyyy-MM-dd HH:mm:ss
+    time-zone: GMT+8
+  # 为什么不配 spring.datasource:
+  # z-boot-datasource-starter 用 ModuleDataSourceTemplate 接管数据源, 它只认
+  # z.base.db.{module}.* ; 若 yaml 里留着 spring.datasource, Spring 原生
+  # DataSourceAutoConfiguration 会先生成一份 dataSource bean 且不进模板,
+  # 结果是 bean 重名 + 启动报 "url attribute is not specified"。
+  # ⇒ 让 spring.datasource 整个不存在, 由 z-boot 模板构建。
+  autoconfigure:
+    exclude:
+      - org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration
+      - org.springframework.boot.autoconfigure.jdbc.DataSourceTransactionManagerAutoConfiguration
+      - com.alibaba.druid.spring.boot.autoconfigure.DruidDataSourceAutoConfigure
+      - com.baomidou.mybatisplus.autoconfigure.MybatisPlusAutoConfiguration
+
+z:
+  base:
+    db:
+      # z-surl 的**独立**数据源: Java 侧是单独一个 DataSource bean（dataSourceSurl），
+      # 表 z_surl_mapping 的元数据不归任何其他模块管辖。
+      # 物理上默认指向组织主库（db oc），与 z.base.db.default 平行但可独立覆盖。
+      # 键名说明: ModuleDataSourceTemplate 只读 host/port/username/password/database，
+      # JDBC URL 由它自己拼成 jdbc:mysql://{host}:{port}/{database}?serverTimezone=UTC...
+      # —— **没有 url 这一项**，写了也不生效。
+      surl:
+        host: ${ZSURL_DB_HOST:127.0.0.1}
+        port: ${ZSURL_DB_PORT:3306}
+        database: ${ZSURL_DB_NAME:oc}
+        username: ${ZSURL_DB_USER:root}
+        # 凭证永不入 Git（008_组织规范/001_凭证管理规范.md）：默认空，走环境变量注入
+        password: ${ZSURL_DB_PASSWORD:}
+        initial-size: 2
+        min-idle: 2
+        max-active: 10
+        max-wait: 60000
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+  endpoint:
+    health:
+      show-details: never
+
+logging:
+  level:
+    root: INFO
+    com.zifang.z.surl: INFO
