@@ -21,6 +21,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.validation.Valid;
 import java.net.URI;
 import java.util.Optional;
 
@@ -71,6 +72,14 @@ public class SurlController {
 
     /**
      * 把长链接缩短成短码. ttlMillis 决定过期时长, 0 或 null 表示永不过期.
+     * <p>
+     * <b>{@code @Valid} 不能去掉</b>: {@link SurlShortenRequest} 上声明了
+     * {@code @NotBlank} 与 {@code @Size(max = 2048)}, 而 origin_url 的 DDL 列宽正是
+     * {@code VARCHAR(2048)}。少了 @Valid 这两道约束<b>一次都不会被触发</b> ——
+     * 超过 2048 的 URL 在严格模式下抛 SQLException 变 500，非严格模式下被静默截断，
+     * 结果是短链跳转到【被截断的 URL】。两种都不是本该返回的 400。
+     * <p>
+     * body 仍标 {@code required = false}（缺 body 走不到校验器），所以判空仍需下面手写。
      *
      * @param request 含 originUrl / tenantCode / ttlMillis / remark 的请求体
      * @param userId  创建者账号 id, 来自请求头 X-User-Id, 可选
@@ -78,7 +87,7 @@ public class SurlController {
      */
     @PostMapping("/api/ctc/surl/shorten")
     public Result<SurlShortenResponse> shorten(
-            @RequestBody(required = false) SurlShortenRequest request,
+            @Valid @RequestBody(required = false) SurlShortenRequest request,
             @RequestHeader(value = "X-User-Id", required = false) String userId) {
         // body 标了 required=false, 校验器不会触发, 所以这里显式兜: 缺 body / 缺 url 一律 400, 不落到 500
         if (request == null) {
