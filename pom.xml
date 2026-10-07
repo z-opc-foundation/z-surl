@@ -244,6 +244,16 @@
                             <publishingServerId>central</publishingServerId>
                             <tokenAuth>true</tokenAuth>
                             <autoPublish>true</autoPublish>
+                            <!-- 本插件不认 maven.deploy.skip，没排除的模块照样进 bundle
+                                 （实测结论见 z-schedule/pom.xml 同位置注释）⇒ 不可发布的模块点名列出。
+                                  · z-surl-admin：模块里已写 maven.deploy.skip=true，但那只对
+                                    maven-deploy-plugin 有效，本插件照样把它打进 bundle —— 正是
+                                    "标了 skip 仍在上传"的那一类。管理端可执行应用，repackage
+                                    不带 classifier ⇒ 产物是执行 fat jar，不是别仓可引的库件。
+                                    模块保留在 <modules> 里照常构建，只挡发布。 -->
+                            <excludeArtifacts>
+                                <excludeArtifact>z-surl-admin</excludeArtifact>
+                            </excludeArtifacts>
                             <waitUntil>uploaded</waitUntil>
                             <waitMaxTime>1800</waitMaxTime>
                             <waitPollingInterval>10</waitPollingInterval>
