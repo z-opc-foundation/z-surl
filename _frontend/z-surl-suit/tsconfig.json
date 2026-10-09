@@ -21,8 +21,8 @@
     "baseUrl": ".",
     "paths": {
       "@/*": ["src/*"],
-      "@fc": ["../z-surl-frontend-component/src/index.ts"],
-      "@fc/*": ["../z-surl-frontend-component/src/*"]
+      "@fc": ["../z-surl-component/src/index.ts"],
+      "@fc/*": ["../z-surl-component/src/*"]
     }
   },
   "include": ["src", "vite.config.js"]

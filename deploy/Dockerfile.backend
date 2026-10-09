@@ -5,7 +5,7 @@
 #     docker build -f deploy/Dockerfile.backend -t z-surl-admin:1.0.0 .
 #
 # 【两种模式的差别只在"前端有没有进 jar"】
-#   Mode 1 合体：mvn package 时 _frontend/z-surl-frontend/dist 已被拷进
+#   Mode 1 合体：mvn package 时 _frontend/z-surl-suit/dist 已被拷进
 #                BOOT-INF/classes/static/，本镜像单容器自带控制台。
 #   Mode 2/3 分体：jar 里那份 static 不碍事（后端不会去伺服它，前端由 nginx 出），
 #                  但如果你要求镜像里**确实没有** static，用

@@ -12,7 +12,7 @@
 | 失效 | `DELETE /api/ctc/surl` | `SurlServiceMySqlImpl#invalidate` | ✅ 含重复失效 |
 | 租户强制匹配 | `GET /s/{mapKey}?tenant=` | `SurlController#resolve` | ❌ 未覆盖（见风险 6） |
 | 独立数据源 | `z.base.db.surl.*` | `ZSurlAutoConfiguration` | ❌ 需真实 DB |
-| 控制台 | `/` | `_frontend/z-surl-frontend` | ❌ 未覆盖（见风险 5） |
+| 控制台 | `/` | `_frontend/z-surl-suit` | ❌ 未覆盖（见风险 5） |
 
 单测：**20 例，0.06s**，纯 JUnit 5 + JDK 动态代理 + 内存 Map，0 Mockito / 0 DB / 0 `@SpringBootTest`。
 

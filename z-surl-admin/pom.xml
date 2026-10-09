@@ -75,7 +75,7 @@
     <build>
         <plugins>
             <!--
-                前端注入（Mode 1 合体的关键）：把 _frontend/z-surl-frontend/dist 拷进 jar 的
+                前端注入（Mode 1 合体的关键）：把 _frontend/z-surl-suit/dist 拷进 jar 的
                 BOOT-INF/classes/static/，java -jar 单容器即带控制台。
                 这一格**不联网**，前端由 `deploy/Makefile` 的 `make dev` 用系统 node 先跑
                 `npm run build`（组织惯例：走 npmmirror 源，见 _frontend/.npmrc）。
@@ -94,7 +94,7 @@
                             <outputDirectory>${project.build.outputDirectory}/static</outputDirectory>
                             <resources>
                                 <resource>
-                                    <directory>${project.basedir}/../_frontend/z-surl-frontend/dist</directory>
+                                    <directory>${project.basedir}/../_frontend/z-surl-suit/dist</directory>
                                     <filtering>false</filtering>
                                 </resource>
                             </resources>
@@ -139,7 +139,7 @@
                         <artifactId>frontend-maven-plugin</artifactId>
                         <version>1.15.0</version>
                         <configuration>
-                            <workingDirectory>${project.basedir}/../_frontend/z-surl-frontend</workingDirectory>
+                            <workingDirectory>${project.basedir}/../_frontend/z-surl-suit</workingDirectory>
                             <installDirectory>${project.basedir}/../_frontend/.node</installDirectory>
                         </configuration>
                         <executions>

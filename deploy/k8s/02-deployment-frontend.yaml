@@ -10,7 +10,7 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: z-surl-frontend
+  name: z-surl-suit
   namespace: z-surl
   labels:
     app.kubernetes.io/name: z-surl
@@ -39,7 +39,7 @@ spec:
         fsGroup: 101
       containers:
         - name: frontend
-          image: 192.168.31.250:5000/zifang/z-surl-frontend:1.0.0
+          image: 192.168.31.250:5000/zifang/z-surl-suit:1.0.0
           imagePullPolicy: IfNotPresent
           ports:
             - name: http

@@ -18,7 +18,7 @@ export default defineConfig({
     alias: {
       '@': resolve(__dirname, 'src'),
       // 组件层走源码别名：改组件立刻热更新，不必先 build 组件库
-      '@fc': resolve(__dirname, '../z-surl-frontend-component/src')
+      '@fc': resolve(__dirname, '../z-surl-component/src')
     }
   },
   plugins: [react()],

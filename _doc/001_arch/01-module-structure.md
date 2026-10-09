@@ -70,8 +70,8 @@ starter 的 `@ComponentScan` 已显式列出三个包，启动类只扫 `admin` 
 
 | 层 | npm 名 | 产物 | 职责 |
 |----|--------|------|------|
-| 组件层 | `@yuku123/z-surl-frontend-component` | `dist/index.js` + `.d.ts` | 纯展示组件，**只接 props 不 fetch**（005 §5） |
-| 应用层 | `@yuku123/z-surl-frontend`（private） | `dist/` | SPA，负责取数与组装，嵌进 admin jar |
+| 组件层 | `@yuku123/z-surl-component` | `dist/index.js` + `.d.ts` | 纯展示组件，**只接 props 不 fetch**（005 §5） |
+| 应用层 | `@yuku123/z-surl-suit`（private） | `dist/` | SPA，负责取数与组装，嵌进 admin jar |
 
 组件层消费的符号：
 

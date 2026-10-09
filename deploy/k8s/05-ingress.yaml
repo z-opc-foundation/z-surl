@@ -47,6 +47,6 @@ spec:
             pathType: Prefix
             backend:
               service:
-                name: z-surl-frontend
+                name: z-surl-suit
                 port:
                   name: http

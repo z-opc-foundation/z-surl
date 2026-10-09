@@ -67,11 +67,11 @@ verify: test ## 收口验证：单测 + house-style 闸门 + 依赖树无 com.zi
 ## ---------- 前端 ----------
 
 fe: ## 构建前端两层（组件层先出 d.ts + 产物自检，再出 SPA）
-	cd _frontend/z-surl-frontend-component && npm install --no-audit --no-fund && npm run build
-	cd _frontend/z-surl-frontend && npm install --no-audit --no-fund && npm run build
+	cd _frontend/z-surl-component && npm install --no-audit --no-fund && npm run build
+	cd _frontend/z-surl-suit && npm install --no-audit --no-fund && npm run build
 
 fe-dev: ## 前端热更新（配合 mvn spring-boot:run 用）
-	cd _frontend/z-surl-frontend && npm run dev
+	cd _frontend/z-surl-suit && npm run dev
 
 ## ---------- 镜像与部署 ----------
 
@@ -114,8 +114,8 @@ run-local: ## 本机 java -jar（H2 内存库，不连 MySQL）
 clean: ## 清构建产物
 	mvn $(MAVEN_ARGS) clean
 	@echo "==> 清理前端产物"
-	@rm -rf _frontend/z-surl-frontend-component/dist \
-	       _frontend/z-surl-frontend-component/node_modules \
-	       _frontend/z-surl-frontend/dist \
-	       _frontend/z-surl-frontend/node_modules \
+	@rm -rf _frontend/z-surl-component/dist \
+	       _frontend/z-surl-component/node_modules \
+	       _frontend/z-surl-suit/dist \
+	       _frontend/z-surl-suit/node_modules \
 	       _frontend/.node

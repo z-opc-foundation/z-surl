@@ -1,5 +1,5 @@
 {
-  "name": "@yuku123/z-surl-frontend",
+  "name": "@yuku123/z-surl-suit",
   "version": "1.0.0",
   "description": "z-surl admin 控制台 SPA（应用层；只服务本仓 admin，不发 npm）",
   "private": true,
@@ -11,7 +11,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@yuku123/z-surl-frontend-component": "file:../z-surl-frontend-component",
+    "@yuku123/z-surl-component": "file:../z-surl-component",
     "antd": "^6.3.3",
     "dayjs": "^1.11.10",
     "react": "^19.2.0",

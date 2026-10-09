@@ -19,8 +19,8 @@ z-surl/
 ├── z-surl-starter/            # 业务方 import 的唯一入口：@AutoConfiguration + HTTP API
 ├── z-surl-admin/              # 最小可启动单体（deploy.skip=true，**不上 Central**）
 ├── _frontend/                 # 前端容器
-│   ├── z-surl-frontend-component/   # 组件层（library，纯 props 契约，可跨仓复用）
-│   └── z-surl-frontend/             # 应用层（SPA，只服务本仓 admin）
+│   ├── z-surl-component/   # 组件层（library，纯 props 契约，可跨仓复用）
+│   └── z-surl-suit/             # 应用层（SPA，只服务本仓 admin）
 ├── deploy/                    # 三模式 compose + Dockerfile ×2 + k8s + Makefile
 └── _doc/
     ├── 001_arch/              # 架构四篇（overview / module-structure / feature / db-schema）

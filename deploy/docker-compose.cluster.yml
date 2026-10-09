@@ -65,8 +65,8 @@ services:
       INSTANCE_INDEX: "2"
 
   frontend:
-    image: ${IMAGE_REPO:-zifang}/z-surl-frontend:${VERSION:-1.0.0}
-    container_name: z-surl-frontend
+    image: ${IMAGE_REPO:-zifang}/z-surl-suit:${VERSION:-1.0.0}
+    container_name: z-surl-suit
     restart: unless-stopped
     depends_on:
       backend-0:
