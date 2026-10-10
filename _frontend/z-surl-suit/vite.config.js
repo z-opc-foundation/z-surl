@@ -15,6 +15,7 @@ import { resolve } from 'node:path'
 export default defineConfig({
   base: '/',
   resolve: {
+    dedupe: ['react', 'react-dom', 'react-router-dom', 'antd', '@ant-design/icons', 'axios'],
     alias: {
       '@': resolve(__dirname, 'src'),
       // 组件层走源码别名：改组件立刻热更新，不必先 build 组件库
