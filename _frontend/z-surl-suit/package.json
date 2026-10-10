@@ -11,7 +11,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@yuku123/z-surl-component": "file:../z-surl-component",
+    "@yuku123/z-surl-component": "^1.0.0",
     "antd": "^6.3.3",
     "dayjs": "^1.11.10",
     "react": "^19.2.0",

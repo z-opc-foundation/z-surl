@@ -16,11 +16,7 @@ export default defineConfig({
   base: '/',
   resolve: {
     dedupe: ['react', 'react-dom', 'react-router-dom', 'antd', '@ant-design/icons', 'axios'],
-    alias: {
-      '@': resolve(__dirname, 'src'),
-      // 组件层走源码别名：改组件立刻热更新，不必先 build 组件库
-      '@fc': resolve(__dirname, '../z-surl-component/src')
-    }
+    alias: { '@': path.resolve(__dirname, 'src'), ...(process.env.LOCAL_SIBLINGS === '1' ? { '@yuku123/z-surl-component': '../z-surl-component/src' } : {}) }
   },
   plugins: [react()],
   server: {
