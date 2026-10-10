@@ -12,7 +12,7 @@ export const menuItems: MenuItem[] = [
     { key: '/z-surl/console', label: '短链控制台', icon: <LinkOutlined /> },
 ]
 
-export const routeTable: RouteEntry[] = [
+export const routes: RouteEntry[] = [
     { path: '/z-surl/home', Component: HomePage },
     { path: '/z-surl/console', Component: ConsolePage },
 ]
