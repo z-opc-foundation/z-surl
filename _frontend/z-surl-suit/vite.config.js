@@ -1,6 +1,6 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
-import { resolve } from 'node:path'
+import path from 'node:path'
 
 /**
  * 应用层 = SPA，产物 dist/ 由 z-surl-admin 的 maven-resources-plugin 拷进
@@ -16,7 +16,7 @@ export default defineConfig({
   base: '/',
   resolve: {
     dedupe: ['react', 'react-dom', 'react-router-dom', 'antd', '@ant-design/icons', 'axios'],
-    alias: { '@': path.resolve(__dirname, 'src'), ...(process.env.LOCAL_SIBLINGS === '1' ? { '@yuku123/z-surl-component': '../z-surl-component/src' } : {}) }
+    alias: { '@': path.resolve(__dirname, 'src'), '@fc': path.resolve(__dirname, '../z-surl-component/src/index.ts'), ...(process.env.LOCAL_SIBLINGS === '1' ? { '@yuku123/z-surl-component': '../z-surl-component/src' } : {}) }
   },
   plugins: [react()],
   server: {

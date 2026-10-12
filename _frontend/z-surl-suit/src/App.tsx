@@ -1,7 +1,7 @@
 import { Component, useEffect, useState } from 'react'
 import type { ErrorInfo, ReactNode } from 'react'
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom'
-import { AppLayout } from '../../../../_shared/z-frontend-common-local/dist/z-frontend-common.es.js'
+import { AppLayout } from '@yuku123/z-frontend-common'
 import { menuItems, routes } from './pages-manifest'
 import LoginPage from './LoginPage'
 import { Button, Result } from 'antd'
