@@ -39,24 +39,13 @@ export default defineConfig({
     // 真要瘦身要走按需引入（unplugin-vue/React Components 式的 babel plugin），
     // 那是独立决策，不在本次技术栈对齐范围内。
     chunkSizeWarningLimit: 1300,
-    // antd 6 全量 import 时单 chunk 会到 1.4MB+（gzip ~470KB），
-    // vite 会报 "chunks are larger than 500 kB"。按 vendor 拆开后：
-    //   - 业务代码迭代时浏览器只重新下 app 那一小段
-    //   - antd/rc-* 变成长期缓存的稳定 chunk
-    //
-    // 用**函数形式按模块路径**分派，而不是 `manualChunks: { antd: ['antd'] }` 的
-    // 入口数组形式：后者在 antd 这种"自身也 import react"的依赖图下会把 react
-    // 留在主 chunk、同时生成一个 1 字节的空 react chunk —— 总量没降还多了个废产物
-    // （实测踩过：拆完 index 765KB + antd 683KB + react 0.00KB，比不拆还难看）。
-    rollupOptions: {
-      output: {
-        manualChunks(id) {
-          if (!id.includes('node_modules')) return undefined
-          if (/node_modules\/(react|react-dom|scheduler)\//.test(id)) return 'react'
-          if (/node_modules\/(antd|@ant-design|rc-[^/]+|@rc-component)\//.test(id)) return 'antd'
-          return 'vendor'
-        }
-      }
-    }
+    // 不做 manualChunks 手工分派。原先按模块路径硬拆成 react/antd/vendor 三块，
+    // 但 @yuku123/z-frontend-common 里的 AppLayout 依赖 antd、antd 又经
+    // @ant-design/icons 回指它 —— 拆出来的 vendor → antd → vendor 是**循环 chunk**，
+    // rollup 只能报一句 warning 就继续，产物在浏览器里直接炸：
+    //   ReferenceError: Cannot access 'rn' before initialization（vendor chunk TDZ）
+    // 症状极阴：构建绿、四个 chunk 全 200、控制台无日志，只是整页白屏。
+    // 交给 rollup 自己分块就没有这个问题，且仍会把稳定的依赖单独切出来。
+    rollupOptions: {}
   }
 })

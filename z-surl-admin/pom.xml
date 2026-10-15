@@ -77,9 +77,50 @@
             <!--
                 前端注入（Mode 1 合体的关键）：把 _frontend/z-surl-suit/dist 拷进 jar 的
                 BOOT-INF/classes/static/，java -jar 单容器即带控制台。
-                这一格**不联网**，前端由 `deploy/Makefile` 的 `make dev` 用系统 node 先跑
-                `npm run build`（组织惯例：走 npmmirror 源，见 _frontend/.npmrc）。
+                构建前端的两步（装 node + npm run build）由 frontend-maven-plugin 在默认构建里跑 ——
+                曾藏在 -Pfrontend profile 里，理由是「要下 node 发行包，离线会失败」，但那条理由
+                已被实测证伪：同一插件 1.15.0 在 z-wf/z-task/z-webide/z-camuda 上都正常下过 node。
+                不进默认构建的代价是 `mvn package` 出来的 jar 永远没有前端，域名打开是 404。
             -->
+            <plugin>
+                <groupId>com.github.eirslett</groupId>
+                <artifactId>frontend-maven-plugin</artifactId>
+                <version>1.15.0</version>
+                <configuration>
+                    <workingDirectory>${project.basedir}/../_frontend/z-surl-suit</workingDirectory>
+                    <installDirectory>${project.basedir}/../_frontend/.node</installDirectory>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>install-node-and-npm</id>
+                        <goals>
+                            <goal>install-node-and-npm</goal>
+                        </goals>
+                        <configuration>
+                            <nodeVersion>v20.18.0</nodeVersion>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>npm-install</id>
+                        <goals>
+                            <goal>npm</goal>
+                        </goals>
+                        <configuration>
+                            <arguments>install --install-links</arguments>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>npm-build</id>
+                        <goals>
+                            <goal>npm</goal>
+                        </goals>
+                        <configuration>
+                            <arguments>run build</arguments>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-resources-plugin</artifactId>
@@ -123,57 +164,4 @@
         </plugins>
     </build>
 
-    <profiles>
-        <!--
-            -Pfrontend：由 Maven 驱动前端构建（CI / 有外网的环境用）。
-            frontend-maven-plugin 需要从 nodejs.org 下载 node 发行包，**离线环境会失败**，
-            所以不进默认构建：本地/CI 无网时走 `make dev`（系统 node + npmmirror 源），
-            效果等价且不依赖 nodejs.org 可达性。
-        -->
-        <profile>
-            <id>frontend</id>
-            <build>
-                <plugins>
-                    <plugin>
-                        <groupId>com.github.eirslett</groupId>
-                        <artifactId>frontend-maven-plugin</artifactId>
-                        <version>1.15.0</version>
-                        <configuration>
-                            <workingDirectory>${project.basedir}/../_frontend/z-surl-suit</workingDirectory>
-                            <installDirectory>${project.basedir}/../_frontend/.node</installDirectory>
-                        </configuration>
-                        <executions>
-                            <execution>
-                                <id>install-node-and-npm</id>
-                                <goals>
-                                    <goal>install-node-and-npm</goal>
-                                </goals>
-                                <configuration>
-                                    <nodeVersion>v20.18.0</nodeVersion>
-                                </configuration>
-                            </execution>
-                            <execution>
-                                <id>npm-install</id>
-                                <goals>
-                                    <goal>npm</goal>
-                                </goals>
-                                <configuration>
-                                    <arguments>install --install-links</arguments>
-                                </configuration>
-                            </execution>
-                            <execution>
-                                <id>npm-build</id>
-                                <goals>
-                                    <goal>npm</goal>
-                                </goals>
-                                <configuration>
-                                    <arguments>run build</arguments>
-                                </configuration>
-                            </execution>
-                        </executions>
-                    </plugin>
-                </plugins>
-            </build>
-        </profile>
-    </profiles>
 </project>

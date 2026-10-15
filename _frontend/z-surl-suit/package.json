@@ -7,7 +7,8 @@
   "scripts": {
     "dev": "vite",
     "typecheck": "tsc --noEmit",
-    "build": "tsc --noEmit && vite build",
+    "build:component": "cd ../z-surl-component && npm install --silent && npm run build",
+    "build": "npm run build:component && tsc --noEmit && vite build",
     "preview": "vite preview"
   },
   "dependencies": {
