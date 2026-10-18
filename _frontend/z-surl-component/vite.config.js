@@ -11,10 +11,14 @@ import { resolve } from 'node:path'
 export default defineConfig({
   build: {
     lib: {
-      entry: resolve(__dirname, 'src/index.ts'),
+      // 两个 entry 对应 exports 两张脸: './dist/index.js'(.) 与 './dist/pages.js'(./pages,
+      // lead 005 §8.2/§8.6 #3)。只声明 index 时产物里没有 pages.js, 而 exports 还指着它。
+      entry: {
+        index: resolve(__dirname, 'src/index.ts'),
+        pages: resolve(__dirname, 'src/pages.ts'),
+      },
       name: 'ZSurlFrontendComponent',
       formats: ['es'],
-      fileName: () => 'index.js'
     },
     // 业务方（z-opc）与 admin 都要 tree-shake，关掉这两项才有效
     rollupOptions: {

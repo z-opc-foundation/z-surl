@@ -12,9 +12,16 @@
  *   1. dist/index.js 存在且非空
  *   2. dist/index.d.ts 存在且非空
  *   3. d.ts 里能查到对外导出的关键符号（防止只声明了一部分）
- *   4. index.js 里 React/antd 没被打进产物（external 生效的粗验证）
+ *   4. dist/pages.js 存在（exports 的 "./pages" 正指着它；缺了宿主 import 就 module not found）
+ *   5. React/antd 没被打进产物（external 生效的粗验证）
+ *
+ * 【第 5 条为什么要扫 dist 下全部 js 而不是只读 index.js】
+ * 组件层是多 entry 构建（index + pages），共用代码会被 rollup 抽成共享 chunk，
+ * index.js 只剩一个 re-export 桩。原来只看 index.js 时，要么误报"没 external 化"
+ * （实际 external 好的，只是断言看错了文件），要么在代码还全挤在 index.js 的旧布局下
+ * 才碰巧成立 —— 断言跟着产物布局漂移，就是假绿灯的来源。
  */
-import { readFileSync, existsSync, statSync } from 'node:fs'
+import { readFileSync, existsSync, statSync, readdirSync } from 'node:fs'
 import { fileURLToPath } from 'node:url'
 import { dirname, resolve } from 'node:path'
 
@@ -41,6 +48,8 @@ function requireFile(rel, label) {
 
 const jsPath = requireFile('index.js', 'JS 产物')
 const dtsPath = requireFile('index.d.ts', '类型声明')
+requireFile('pages.js', '路由清单产物（exports 的 ./pages）')
+requireFile('pages.d.ts', '路由清单类型声明（exports 的 ./pages.types）')
 
 if (dtsPath) {
   const dts = readFileSync(dtsPath, 'utf8')
@@ -51,10 +60,13 @@ if (dtsPath) {
 }
 
 if (jsPath) {
-  const js = readFileSync(jsPath, 'utf8')
+  const bundled = readdirSync(dist)
+    .filter((f) => f.endsWith('.js'))
+    .map((f) => readFileSync(resolve(dist, f), 'utf8'))
+    .join('\n')
   // 粗验证：external 生效时产物里应该出现 from 'antd' / from "react" 这类裸 import
   const notExternalised = PEER_DEPS.filter(
-    (dep) => !new RegExp(`from\\s*['"]${dep}`).test(js)
+    (dep) => !new RegExp(`from\\s*['"]${dep}`).test(bundled)
   )
   if (notExternalised.length) {
     failures.push(
