@@ -169,3 +169,5 @@ coverage/
 # 环境变量 (敏感信息)
 .env
 .gnupg/
+# ===== lead 002 规范：临时/运行态件一律写 <仓>/.cache/，且 .cache 必须被 ignore =====
+/.cache/

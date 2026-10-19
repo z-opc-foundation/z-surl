@@ -133,3 +133,11 @@ make -f deploy/Makefile fe-dev   # 前端热更新
 [MIT](LICENSE)
 
 <!-- icon: minimax image-01, gradient=#0891b2, glyph=url -->
+
+## 文档目录
+
+本项目文档统一收口在 `_doc/` 下（lead 002 规范八类固定编号表，桶按需存在）:
+
+- [`_doc/001_arch/`](_doc/001_arch/) — 项目总览、模块结构、接口清单、DB schema
+- [`_doc/002_deploy/`](_doc/002_deploy/) — 初始化 SQL（`init/schema.sql` 与 `init/migration/`）
+- [`_doc/003_script/`](_doc/003_script/) — 房规门禁脚本（`house-style-gate.sh`）

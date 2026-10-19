@@ -71,7 +71,7 @@ check 2 "出现 DB 依赖（单测不许连库、不许改系统状态）"      
 check 3 "出现 Spring 容器启动（单测要 <2s 跑完）"          '@SpringBootTest|@RunWith|SpringExtension'
 check 4 "出现硬编码凭证（008 凭证管理规范）"  '(password|passwd|secret)[[:space:]]*[:=][[:space:]]*[\"'"'"']?[A-Za-z0-9!@#%^&*_+.-]{8,}'
 # 判据 4 的正则说明：
-#   - [\"']? 允许赋值号与值之间夹一个引号（password = "Hhzemol123" 这种最常见写法），
+#   - [\"']? 允许赋值号与值之间夹一个引号（password = "S3cretPassw0rd" 这种最常见写法），
 #     漏掉它会让模式只在"不加引号"时才命中，等于对最常见的违规形态失明。
 #   - 外层单引号 + '\'' 的转义写法，是 POSIX sh 里把单引号放进正则的惯用法。
 #   - 不会误报 ${ZSURL_DB_PASSWORD:}（$ 开头不在值字符类里）。
