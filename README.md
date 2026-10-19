@@ -7,7 +7,7 @@
 
 ## 一句话技术栈
 
-**Java 8 + Spring Boot 2.7.18 + MyBatis-Plus 3.5.7 + z-boot-parent 1.0.21 + Maven Central（`io.github.yuku123`）**
+**Java 8 + Spring Boot 2.7.18 + MyBatis-Plus 3.5.7 + z-boot-parent 1.1.0 + Maven Central（`io.github.yuku123`）**
 前端 **React 19 + Vite 6 + antd 6 + TypeScript**。
 
 ## 目录结构
@@ -71,7 +71,7 @@ Secret 现场生成，**不从文件 apply**（`deploy/k8s/06-secret.example.yam
 <dependency>
     <groupId>io.github.yuku123</groupId>
     <artifactId>z-surl-starter</artifactId>
-    <!-- 版本不写：由 z-boot-dependencies / z-boot-fleet 锁 -->
+    <!-- 版本不写：由 z-boot-parent 锁 -->
 </dependency>
 ```
 
