@@ -15,8 +15,8 @@
 ```
 z-surl/
 ├── pom.xml                    # 自包含 parent（${revision} + flattenMode=oss）
-├── z-surl-core/               # DO / Mapper / SurlDbService / SurlService（业务方不直接 import）
-├── z-surl-starter/            # 业务方 import 的唯一入口：@AutoConfiguration + HTTP API
+├── z-surl-core/               # SurlMappingDO / SurlMappingMapper / SurlDbService / SurlService（业务方不直接 import）
+├── z-surl-starter/            # 业务方 import 的唯一入口：ZSurlAutoConfiguration（@AutoConfiguration）+ SurlController（HTTP API）
 ├── z-surl-admin/              # 最小可启动单体（deploy.skip=true，**不上 Central**）
 ├── _frontend/                 # 前端容器
 │   ├── z-surl-component/   # 组件层（library，纯 props 契约，可跨仓复用）
@@ -99,6 +99,10 @@ z:
 | DELETE | `/api/ctc/surl?mapKey=` | 失效（不存在 → body `code=404`） |
 | GET | `/s/{mapKey}` | 跳转（**真 302** + `Location`；不存在 → 真 404） |
 
+> 本仓 README 的定量主张（模块清单 / admin 不上 Central / 端口 / HTTP 端点数 / 表名 /
+> 风险条数 / 架构篇数）由 `z-surl-core/src/test/java/com/zifang/z/surl/ReadmeClaimsTest.java`
+> 逐条与源码对账，README 改了就红。
+
 ### ⚠️ 路径里的 `ctc` 是历史遗留，不要改
 
 本仓从 z-ctc 抽出时沿用了 `/api/ctc/surl/**`，与新仓名 z-surl 不符。但实测有**两处活依赖**：
@@ -119,14 +123,15 @@ z:
 ## 开发
 
 ```bash
-make -f deploy/Makefile test     # 单测（20 例，JDK 动态代理 + 内存 Map，0 Mockito / 0 DB）
+make -f deploy/Makefile test     # 单测（`SurlServiceMySqlImplTest` + `SurlControllerValidationTest`
+                              #       两个测试类，JDK 动态代理 + 内存 Map，0 Mockito / 0 DB）
 make -f deploy/Makefile verify   # 收口验证：单测 + house-style 闸门 + 依赖树无 com.zifang
 make -f deploy/Makefile fe-dev   # 前端热更新
 ```
 
 ## 已知风险
 
-见 [`_doc/001_arch/02-feature.md`](_doc/001_arch/02-feature.md) 的风险表（5 条，含缓解措施）。
+见 [`_doc/001_arch/02-feature.md`](_doc/001_arch/02-feature.md) 的风险表（6 条，含缓解措施）。
 
 ## License
 
