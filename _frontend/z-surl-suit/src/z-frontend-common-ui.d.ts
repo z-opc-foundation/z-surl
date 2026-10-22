@@ -38,4 +38,16 @@ declare module '@yuku123/z-frontend-common/ui' {
     loading?: boolean
     title?: string
   }): ReactElement
+
+  // 组件文档页（lead 008 §7）：基座提供 TOC + 两栏 + 零依赖 markdown 引擎，
+  // 各仓只提供 DOC.md 内容（编译期 ?raw 内联）。
+  export function ComponentDoc(props: {
+    markdown: string
+    title?: string
+    tocWidth?: number
+    tocLevels?: number[]
+    height?: string
+    markdownComponents?: Record<string, unknown>
+    renderMarkdown?: (args: { markdown: string; components: Record<string, unknown> }) => ReactNode
+  }): ReactElement
 }
