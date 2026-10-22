@@ -1,6 +1,6 @@
 {
   "name": "@yuku123/z-surl-component",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "z-surl 短链控制台组件层（跨仓复用；纯展示 + props 契约，不直接 fetch）",
   "license": "MIT",
   "type": "module",
