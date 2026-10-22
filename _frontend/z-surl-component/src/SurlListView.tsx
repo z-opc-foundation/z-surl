@@ -1,5 +1,6 @@
 import { Button, Popconfirm, Space, Table, Tag, Tooltip, Typography } from 'antd'
 import type { ColumnsType } from 'antd/es/table'
+import { EmptyState, RefreshButton } from '@yuku123/z-frontend-common/ui'
 import type { SurlItem } from './types'
 
 export interface SurlListViewProps {
@@ -142,9 +143,7 @@ export default function SurlListView(props: SurlListViewProps) {
     <>
       {onReload && (
         <div style={{ marginBottom: 12, textAlign: 'right' }}>
-          <Button onClick={onReload} loading={loading}>
-            刷新
-          </Button>
+          <RefreshButton onClick={onReload} loading={loading} />
         </div>
       )}
       <Table<SurlItem>
@@ -155,6 +154,7 @@ export default function SurlListView(props: SurlListViewProps) {
         pagination={pagination}
         size="middle"
         scroll={{ x: 1000 }}
+        locale={{ emptyText: <EmptyState title="暂无短链" description="生成短链后会出现在这里" size="sm" /> }}
       />
     </>
   )

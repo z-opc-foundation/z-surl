@@ -1,6 +1,5 @@
 import { useCallback, useMemo, useState } from 'react'
 import {
-  Alert,
   App as AntdApp,
   Button,
   Card,
@@ -11,6 +10,7 @@ import {
   Space,
   Typography
 } from 'antd'
+import { EmptyState } from '@yuku123/z-frontend-common/ui'
 import {
   SurlListView,
   SurlShortenForm,
@@ -203,11 +203,11 @@ export default function App() {
           }
         >
           {sessionItems.length === 0 ? (
-            <Alert
-              type="info"
-              showIcon
-              message="还没有创建过短链"
+            // 空态走共享 EmptyState：与列表页的空态文案/视觉一致（lead 008 全仓统一）
+            <EmptyState
+              title="还没有创建过短链"
               description="上面生成短链后会自动出现在这里，可复制链接或一键失效。"
+              size="sm"
             />
           ) : (
             <SurlListView

@@ -21,8 +21,12 @@ export default defineConfig({
       formats: ['es'],
     },
     // 业务方（z-opc）与 admin 都要 tree-shake，关掉这两项才有效
+    // ⚠️ rollup 的 external 数组是**精确匹配**：基座的 '/ui' 子路径要单独列，
+    // 只写根路径时 '@yuku123/z-frontend-common/ui' 会被解析并整包打进产物。
     rollupOptions: {
-      external: ['react', 'react-dom', 'react/jsx-runtime', 'antd'],
+      external: ['react', 'react-dom', 'react/jsx-runtime', 'antd',
+        '@yuku123/z-frontend-common', '@yuku123/z-frontend-common/ui',
+        '@yuku123/z-frontend-common/ui/echarts'],
       output: {
         globals: {
           react: 'React',

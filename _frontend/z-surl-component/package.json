@@ -38,6 +38,9 @@
     "react-dom": "^19.0.0",
     "react-router-dom": "^7.0.0"
   },
+  "dependencies": {
+    "@yuku123/z-frontend-common": "^1.1.2"
+  },
   "devDependencies": {
     "@types/react": "^19.0.0",
     "@types/react-dom": "^19.0.0",
