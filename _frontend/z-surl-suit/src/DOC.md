@@ -81,7 +81,7 @@ import type {SurlItem, SurlShortenInput, SurlShortenResult} from '@fc'
 
 ### 4.3 登录
 
-**mock 登录**：硬编码 `admin / 123456`，成功后写 `localStorage.token`（值形如 `mock-admin`）与
+**mock 登录**：账号由构建期注入 `VITE_MOCK_USER / VITE_MOCK_PASSWORD`（未注入时登录页提示未配置），成功后写 `localStorage.token`（值形如 `mock-admin`）与
 `localStorage.userInfo`，再整页跳 `/z-surl/home`。CTC/SSO 接入后应换共享 `LoginPage` 的 `loginApi`。
 
 ### 4.4 组件文档
@@ -107,7 +107,7 @@ import type {SurlItem, SurlShortenInput, SurlShortenResult} from '@fc'
 - **后端没有列表接口**（只有 shorten / info / invalidate / resolve 四个端点），
   所以控制台表格是**本次会话创建的短链**，不是全量库存，**刷新页面即清空**。
   要做真·全量列表需要后端补分页接口（`PaginationInnerInterceptor` 已装好）。
-- **登录是硬编码 mock**（`admin / 123456`），没有真实鉴权；`App.tsx` 的 `ProtectedShell` 只判断 `localStorage.token` 是否存在。
+- **登录是 mock（账号由环境变量注入）**，没有真实鉴权；`App.tsx` 的 `ProtectedShell` 只判断 `localStorage.token` 是否存在。
 - `src/api.ts` 的 `request` **不带任何鉴权头**（只发 `Content-Type`），也没有走基座的共享 request 实例。
 - 生成接口只回 4 个字段，列表要展示全字段**必须多一次 `info` 往返**（已按「字段完整优先」取舍）。
 - `npm run build` 会**先构建 `z-surl-component`**（`build:component` 脚本里带 `npm install`），
