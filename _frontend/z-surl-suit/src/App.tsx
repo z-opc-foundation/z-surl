@@ -5,6 +5,8 @@ import { AppLayout } from '@yuku123/z-frontend-common'
 import { menuItems, routes } from './pages-manifest'
 import LoginPage from './LoginPage'
 import { Button, Result } from 'antd'
+// 版本号只认 package.json，避免顶栏版本与发版号两处各写一遍慢慢漂移。
+import { version as appVersion } from '../package.json'
 
 interface EBProps { children?: ReactNode }
 interface EBState { err: Error | null }
@@ -55,7 +57,7 @@ function ProtectedShell() {
             menuItems={menuItems}
             appTitle="z-surl 控制台"
             appShort="z-surl"
-            appVersion="1.0.0"
+            appVersion={appVersion}
             appIcon={{
                 icon: <img src="/icon.png" alt="z-surl 控制台" style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: 8 }} />,
                 color: '#ef4444',
