@@ -1,6 +1,6 @@
 {
   "name": "@yuku123/z-surl-suit",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "z-surl admin 控制台 SPA（应用层；只服务本仓 admin，不发 npm）",
   "private": true,
   "type": "module",
