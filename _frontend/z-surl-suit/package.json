@@ -12,7 +12,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@yuku123/z-frontend-common": "^1.1.2",
+    "@yuku123/z-frontend-common": "^1.1.7",
     "@yuku123/z-surl-component": "^1.0.0",
     "antd": "^6.3.3",
     "dayjs": "^1.11.10",
