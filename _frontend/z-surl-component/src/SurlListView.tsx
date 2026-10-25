@@ -1,4 +1,5 @@
-import { Button, Popconfirm, Space, Table, Tag, Tooltip, Typography } from 'antd'
+import { useMemo, useState } from 'react'
+import { Button, Input, Popconfirm, Space, Table, Tag, Tooltip, Typography } from 'antd'
 import type { ColumnsType } from 'antd/es/table'
 import { EmptyState, RefreshButton } from '@yuku123/z-frontend-common/ui'
 import type { SurlItem } from './types'
@@ -45,6 +46,18 @@ export default function SurlListView(props: SurlListViewProps) {
     const ts = Date.parse(item.expireAt)
     return Number.isFinite(ts) && ts <= Date.now()
   }
+
+  // lead 008 §2 规则 3：客户端查询过滤（组件层不自己取数，过滤在端侧做）。
+  // 参与匹配的字段取自本页 columns 真实存在的 dataIndex：mapKey / originUrl / tenantCode。
+  const [keyword, setKeyword] = useState<string>('')
+  const filteredItems = useMemo<SurlItem[]>(() => {
+    const list = Array.isArray(items) ? items : []
+    const kw = keyword.trim().toLowerCase()
+    if (!kw) return list
+    return list.filter((r) =>
+      `${r.mapKey || ''} ${r.originUrl || ''} ${r.tenantCode || ''}`.toLowerCase().includes(kw)
+    )
+  }, [items, keyword])
 
   const columns: ColumnsType<SurlItem> = [
     {
@@ -146,10 +159,18 @@ export default function SurlListView(props: SurlListViewProps) {
           <RefreshButton onClick={onReload} loading={loading} />
         </div>
       )}
+      <Space style={{ marginBottom: 8 }}>
+        <Input.Search
+          allowClear
+          placeholder="按短码 / 原始链接 / 租户过滤"
+          style={{ width: 280 }}
+          onChange={(e) => setKeyword(e.target.value)}
+        />
+      </Space>
       <Table<SurlItem>
         rowKey={(r) => r.mapKey}
         columns={columns}
-        dataSource={items}
+        dataSource={filteredItems}
         loading={loading}
         pagination={pagination}
         size="middle"
