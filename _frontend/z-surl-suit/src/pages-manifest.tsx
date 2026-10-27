@@ -4,7 +4,7 @@ import HomePage from './HomePage'
 import ConsolePage from './ConsolePage'
 import ComponentDocPage from './pages/ComponentDoc'
 
-export interface MenuItem { key: string; label: string; icon: ReactNode }
+export interface MenuItem { key: string; label: string; icon: ReactNode; desc?: string }
 export interface RouteEntry { path: string; Component: ComponentType }
 
 /** 菜单 + 路由清单（lead 008 §10/§14/§16）。 */

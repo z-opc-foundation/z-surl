@@ -22,4 +22,6 @@ declare module '@yuku123/z-frontend-common' {
     headerExtra?: ReactNode
     loading?: boolean
   }): ReactElement
+
+  export function ErrorBoundary(props: { children?: ReactNode }): ReactElement
 }

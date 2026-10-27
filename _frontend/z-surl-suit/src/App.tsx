@@ -1,25 +1,11 @@
-import { Component, useEffect, useState } from 'react'
-import type { ErrorInfo, ReactNode } from 'react'
+import { useEffect, useState } from 'react'
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom'
-import { AppLayout } from '@yuku123/z-frontend-common'
+import { AppLayout, ErrorBoundary } from '@yuku123/z-frontend-common'
 import { menuItems, routes } from './pages-manifest'
 import LoginPage from './LoginPage'
 import { Button, Result } from 'antd'
 // 版本号只认 package.json，避免顶栏版本与发版号两处各写一遍慢慢漂移。
 import { version as appVersion } from '../package.json'
-
-interface EBProps { children?: ReactNode }
-interface EBState { err: Error | null }
-
-class ErrorBoundary extends Component<EBProps, EBState> {
-    constructor(props: EBProps) { super(props); this.state = { err: null } }
-    static getDerivedStateFromError(err: Error): EBState { return { err } }
-    componentDidCatch(err: Error, info: ErrorInfo) { console.error('[App ErrorBoundary]', err, info) }
-    render() {
-        if (this.state.err) return <pre style={{ padding: 24, color: 'red', whiteSpace: 'pre-wrap' }}>{String(this.state.err?.stack || this.state.err)}</pre>
-        return this.props.children
-    }
-}
 
 function NotFound() {
     return (
