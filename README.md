@@ -7,7 +7,7 @@
 
 ## 一句话技术栈
 
-**Java 8 + Spring Boot 2.7.18 + MyBatis-Plus 3.5.7 + z-boot-parent 1.1.0 + Maven Central（`io.github.yuku123`）**
+**Java 8 + Spring Boot 2.7.18 + MyBatis-Plus 3.5.7 + z-boot-parent 1.2.0 + Maven Central（`io.github.yuku123`）**
 前端 **React 19 + Vite 6 + antd 6 + TypeScript**。
 
 ## 目录结构
