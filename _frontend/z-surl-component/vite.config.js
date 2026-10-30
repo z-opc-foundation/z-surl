@@ -1,6 +1,7 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 import { resolve } from 'node:path'
+import {safeEmptyOutDir} from '../../build-tools/safe-vite-plugin.mjs'
 
 /**
  * 组件层 = library mode（005 规范 §1.2）：输出 es + d.ts，不产 index.html、不接路由。
@@ -36,9 +37,9 @@ export default defineConfig({
       }
     },
     sourcemap: true,
-    emptyOutDir: true
+    emptyOutDir: false
   },
-  plugins: [react()],
+  plugins: [safeEmptyOutDir(), react()],
   // 组件层是库，不产 HTML，所以没有 base 概念
   define: {
     // antd 6 在 React 19 下需要这个标记才能走 CSS-in-JS 的正确路径
