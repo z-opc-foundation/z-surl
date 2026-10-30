@@ -19,7 +19,7 @@
         （报错如 `Project name is missing` / `URL missing`）。见 004_flatten_maven_plugin_模式选择.md §3
         与 007_业务仓到z_boot家族标准对齐.md 踩坑 #4。
     -->
-<name>z-surl :: core</name>
+    <name>z-surl :: core</name>
     <description>z-surl core 模块：短链领域层 —— SurlMappingDO + Mapper + SurlDbService + SurlService（数据 + 业务，不含 Web）</description>
     <url>https://github.com/z-opc-foundation/z-surl</url>
     <licenses>

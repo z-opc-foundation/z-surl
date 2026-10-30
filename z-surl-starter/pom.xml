@@ -18,7 +18,7 @@
         业务方 import 的**唯一入口**（→ Maven Central）。按 005 规范 §2.5，starter 自带的 web 层
         （Controller + DTO）也算 starter 的一部分，同样要发 Central。
     -->
-<name>z-surl :: starter</name>
+    <name>z-surl :: starter</name>
     <description>z-surl starter 模块：Spring Boot 自动装配（独立数据源 + SqlSessionFactory）+ 短链 HTTP API（管理面 /api/zSurl/** + 跳转面 /s/{mapKey}）</description>
     <url>https://github.com/z-opc-foundation/z-surl</url>
     <licenses>

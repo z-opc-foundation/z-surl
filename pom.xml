@@ -37,9 +37,12 @@
         <module>z-surl-admin</module>
     </modules>
 
-<name>z-surl :: root</name>
-<description>Z-SURL: 短网址服务 —— 短码生成 / 解析 / 命中统计 / 失效。
-        Spring Boot Starter 一行集成，自带独立数据源（z.base.db.surl.*）与管理控制台。 / Short URL Service</description>
+    <name>z-surl :: root</name>
+    <description>
+        Z-SURL: 短网址服务 —— 短码生成 / 解析 / 命中统计 / 失效。
+        Spring Boot Starter 一行集成，自带独立数据源（z.base.db.surl.*）与管理控制台。
+        Short URL Service
+    </description>
     <url>https://github.com/z-opc-foundation/z-surl</url>
     <licenses>
         <license>

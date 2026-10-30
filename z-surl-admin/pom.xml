@@ -21,7 +21,7 @@
         ⇒ 按 §2.4，这里**不写** url/licenses/developers/scm 四元信息（不 deploy 就不需要，
            写两份反而要同步维护）。
     -->
-<name>z-surl :: admin</name>
+    <name>z-surl :: admin</name>
     <description>z-surl admin 入口：独立可启动 Spring Boot 单体（z-surl-admin-*-exec.jar），内嵌前端 dist，供 Docker / k8s 部署</description>
 
     <properties>
