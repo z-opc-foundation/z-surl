@@ -14,8 +14,7 @@
 # ============================================================================
 
 # eclipse-temurin 8 JRE —— 与本仓 Java 8 字节码目标一致（001_技术栈全景：88% pom 声明 Java 8）
-FROM eclipse-temurin:8-jre-jammy
-
+FROM eclipse-temurin:17-jre-jammy
 ARG VERSION=1.0.0
 LABEL org.opencontainers.image.title="z-surl-admin" \
       org.opencontainers.image.description="z-surl 短网址服务 admin（Spring Boot 单体）" \
