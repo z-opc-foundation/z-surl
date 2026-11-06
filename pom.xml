@@ -82,7 +82,7 @@
             java.version / maven.compiler.source|target / project.build.sourceEncoding / flatten 插件版本
             全部由 parent 下发且面值一致 ⇒ 迁移前那份自带的 <properties> 整块删掉，不做"两处同名键"。
         -->
-        <revision>1.0.0</revision>
+        <revision>1.0.1</revision>
     </properties>
 
     <dependencyManagement>
