@@ -27,7 +27,7 @@ L1 z-opc（业务产品）             主后端 + 主控制台
 | Spring Boot | 2.7.18 | `z-boot-dependencies` 地板 |
 | ORM | MyBatis-Plus 3.5.7 | 地板（mybatis 3.5.16 / jsqlparser 4.9 配套） |
 | 连接池 | Druid 1.2.23 | `z-boot-datasource-starter` |
-| parent | `io.github.yuku123:z-boot-parent:1.0.21` | 见下方选型依据 |
+| parent | `io.github.yuku123:z-boot-parent:1.2.4` | 见下方选型依据 |
 | namespace | `io.github.yuku123` | Sonatype 验证过，`com.zifang` 不再用 |
 | 日志 | Log4j2 2.25.4 | 地板 |
 | 前端 | React 19.2 + Vite 6.2 + antd 6.3 + TS 5.6 | 组织最新基线（z-oss / z-meta / z-config 一致） |

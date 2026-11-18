@@ -91,7 +91,7 @@ SurlItem / SurlShortenInput / SurlShortenResult
 | 项 | 换号前 | 换号后 |
 |----|--------|--------|
 | Maven 坐标 | `com.zifang:z-tool-curl` | `io.github.yuku123:z-surl-{core,starter,admin}` |
-| parent | `com.zifang:z-tool:1.0.0-SNAPSHOT` + `relativePath=../pom.xml`（**该文件不存在**） | `z-boot-parent:1.0.21` + `relativePath` 留空 |
+| parent | `com.zifang:z-tool:1.0.0-SNAPSHOT` + `relativePath=../pom.xml`（**该文件不存在**） | `z-boot-parent:1.2.4` + `relativePath` 留空 |
 | 版本 | `1.0.0-SNAPSHOT` | `${revision}` = `1.0.0` + flatten(oss) |
 | 包名 | `com.zifang.z.tool.curl` | `com.zifang.z.surl` |
 | 实现类 | `CtcSurlServiceMySqlImpl` | `SurlServiceMySqlImpl` |
