@@ -2,10 +2,14 @@ package com.zifang.z.surl.web;
 
 import com.zifang.util.core.meta.Result;
 import com.zifang.util.core.meta.ResultCode;
+import com.zifang.z.meta.api.annotation.BizApi;
+import com.zifang.z.meta.api.annotation.BizField;
+import com.zifang.z.meta.api.annotation.BizParam;
 import com.zifang.z.surl.domain.entity.SurlMappingDO;
 import com.zifang.z.surl.service.SurlService;
 import com.zifang.z.surl.web.request.SurlShortenRequest;
 import com.zifang.z.surl.web.response.SurlShortenResponse;
+import jakarta.validation.Valid;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.http.HttpHeaders;
@@ -21,7 +25,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import jakarta.validation.Valid;
 import java.net.URI;
 import java.util.Optional;
 
@@ -86,9 +89,12 @@ public class SurlController {
      * @return 含 mapKey / originUrl / expireAt / hits 的 SurlShortenResponse (HTTP 201)
      */
     @PostMapping("/api/ctc/surl/shorten")
+    @BizApi(summary = "把长链接缩短成短码. ttlMillis 决定过期时长, 0 或 null 表示永不过期", description = "把长链接缩短成短码. ttlMillis 决定过期时长, 0 或 null 表示永不过期. @Valid 不能去掉 : SurlShortenRequest 上声明了 @NotBlank 与 @Size(max = 2048), 而 origin_url 的 DDL 列宽正是 VARCHAR(2048)。少了 @Valid 这两道约束 一次都不会被触发 —— 超过 2048 的 URL 在严格模式下抛 SQLException 变 500，非严格模式下被静默截断， 结果是短链跳转到【被截断的 URL】。两种都不是本该返回的 400。 body 仍标 required = false（缺 body 走不到校验器），所以判空仍需下面手写。", tags = { "z-surl" })
     public Result<SurlShortenResponse> shorten(
-            @Valid @RequestBody(required = false) SurlShortenRequest request,
-            @RequestHeader(value = "X-User-Id", required = false) String userId) {
+            @Valid @RequestBody(required = false)
+            @BizParam(name = "request", type = BizField.FieldType.STRING, description = "含 originUrl / tenantCode / ttlMillis / remark 的请求体", position = BizParam.Position.BODY) SurlShortenRequest request,
+            @RequestHeader(value = "X-User-Id", required = false)
+            @BizParam(name = "X-User-Id", type = BizField.FieldType.STRING, description = "创建者账号 id, 来自请求头 X-User-Id, 可选", position = BizParam.Position.HEADER) String userId) {
         // body 标了 required=false, 校验器不会触发, 所以这里显式兜: 缺 body / 缺 url 一律 400, 不落到 500
         if (request == null) {
             return Result.<SurlShortenResponse>fail("请求体不能为空").code(400);
@@ -120,7 +126,8 @@ public class SurlController {
      * @return SurlMappingVO; 不存在返回 404
      */
     @GetMapping("/api/ctc/surl/info")
-    public Result<SurlMappingVO> info(@RequestParam("mapKey") String mapKey) {
+    @BizApi(summary = "查询短码的元信息 (含 originUrl / 命中次数 / 过期时间 / 所属租户). 不存在返回 404", description = "查询短码的元信息 (含 originUrl / 命中次数 / 过期时间 / 所属租户). 不存在返回 404.", tags = { "z-surl" })
+    public Result<SurlMappingVO> info(@RequestParam("mapKey") @BizParam(name = "mapKey", type = BizField.FieldType.STRING, description = "短码, 请求参数 (?mapKey=xxx)", position = BizParam.Position.QUERY) String mapKey) {
         return surlService.info(mapKey)
                 .map(t -> Result.success(SurlMappingVO.from(t)))
                 .orElse(Result.<SurlMappingVO>fail("资源不存在").code(ResultCode.NOT_FOUND.getCode()));
@@ -136,7 +143,8 @@ public class SurlController {
      * @return 成功返回空体, 资源不存在返回 404
      */
     @DeleteMapping("/api/ctc/surl")
-    public Result<Object> invalidate(@RequestParam("mapKey") String mapKey) {
+    @BizApi(summary = "把短码标记为失效 —— 后续 resolve 立即返回 404", description = "把短码标记为失效 —— 后续 resolve 立即返回 404. 语义边界: 本实现是物理删除。短链场景下 已发出的链接无法回收 （对方可能已收藏/已投放到 第三方系统），\"失效\"只保证后续解析立即 404。", tags = { "z-surl" })
+    public Result<Object> invalidate(@RequestParam("mapKey") @BizParam(name = "mapKey", type = BizField.FieldType.STRING, description = "短码, 请求参数 (?mapKey=xxx)", position = BizParam.Position.QUERY) String mapKey) {
         boolean ok = surlService.invalidate(mapKey);
         return ok ? Result.success() : Result.fail("资源不存在").code(ResultCode.NOT_FOUND.getCode());
     }
@@ -150,8 +158,10 @@ public class SurlController {
      * 浏览器/curl 直接跳转, 不需要前端解析 JSON
      */
     @GetMapping("/s/{mapKey}")
-    public ResponseEntity<?> resolve(@PathVariable("mapKey") String mapKey,
-                                     @RequestParam(value = "tenant", required = false) String tenant) {
+    @BizApi(summary = "短链跳转入口 —— 命中次数 +1, 返回 302 + Location 头指向 originUrl. 失败返回 404 JSON", description = "短链跳转入口 —— 命中次数 +1, 返回 302 + Location 头指向 originUrl. 失败返回 404 JSON. 浏览器/curl 直接跳转, 不需要前端解析 JSON", tags = { "z-surl" })
+    public ResponseEntity<?> resolve(@PathVariable("mapKey") @BizParam(name = "mapKey", type = BizField.FieldType.STRING, description = "短码, 路径变量", position = BizParam.Position.PATH) String mapKey,
+                                     @RequestParam(value = "tenant", required = false)
+                                     @BizParam(name = "tenant", type = BizField.FieldType.STRING, description = "可选, 强制租户匹配: 传入时必须与短码归属租户一致才允许跳转, 否则 404", position = BizParam.Position.QUERY) String tenant) {
         Optional<SurlMappingDO> resolved = surlService.resolve(mapKey);
         if (!resolved.isPresent()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
@@ -172,3 +182,6 @@ public class SurlController {
         return new ResponseEntity<>(headers, HttpStatus.FOUND);
     }
 }
+
+
+

@@ -77,6 +77,7 @@
     </scm>
 
     <properties>
+        <z-meta.version>1.0.2</z-meta.version>
         <!--
             只留 CI-friendly 版本根（发版改这一处即可，配下方常开 flatten(oss)，入库/发布件里落成字面量）。
             java.version / maven.compiler.source|target / project.build.sourceEncoding / flatten 插件版本
@@ -118,6 +119,11 @@
                 <groupId>io.github.yuku123</groupId>
                 <artifactId>z-boot-datasource-starter</artifactId>
                 <version>${z-boot.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.github.yuku123</groupId>
+                <artifactId>z-meta-api</artifactId>
+                <version>${z-meta.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>

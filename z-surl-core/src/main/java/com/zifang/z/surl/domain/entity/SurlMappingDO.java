@@ -4,6 +4,8 @@ import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
+import com.zifang.z.meta.api.annotation.BizField;
+import com.zifang.z.meta.api.annotation.BizModel;
 
 import java.io.Serializable;
 import java.time.LocalDateTime;
@@ -21,6 +23,7 @@ import java.time.LocalDateTime;
  * <p>
  * 手写 getter/setter：组织规范强制 No Lombok（JDK 25 兼容性）。
  */
+@BizModel(name = "短网址映射实体", module = "z-surl", description = "短网址映射实体. 字段命名与 _doc/002_deploy/init/schema.sql 一一对应 (snake_case → Java camelCase 由 MyBatis-Plus 自动映射)。 表名 {@value #TABLE}：原名 z_ctc_surl_mapping（从 z-ctc 抽出时沿用）， 本仓独立后换名为 z_surl_mapping。线上库的改名脚本见 _doc/002_deploy/init/migration/001_rename_z_ctc_surl_mapping.sql， 由 DBA 择机执行，本仓不代跑 DDL。 手写 getter/setter：组织规范强制 No Lombok（JDK 25 兼容性）。")
 @TableName(SurlMappingDO.TABLE)
 public class SurlMappingDO implements Serializable {
 
@@ -32,45 +35,54 @@ public class SurlMappingDO implements Serializable {
     public static final String TABLE = "z_surl_mapping";
 
     @TableId(value = "id", type = IdType.AUTO)
+    @BizField(name = "id", type = BizField.FieldType.INTEGER)
     private Long id;
 
     /**
      * 短码 (Base62, 8 字符). 业务唯一键.
      */
     @TableField("map_key")
+    @BizField(name = "短码 (Base62, 8 字符). 业务唯一键", type = BizField.FieldType.STRING)
     private String mapKey;
 
     /**
      * 原长链接.
      */
     @TableField("origin_url")
+    @BizField(name = "原长链接", type = BizField.FieldType.STRING)
     private String originUrl;
 
     /**
      * 归属租户 (可空 = 公共链接).
      */
     @TableField("tenant_code")
+    @BizField(name = "tenantCode", type = BizField.FieldType.STRING)
     private String tenantCode;
 
     /**
      * 过期时间 (可空 = 永不过期).
      */
     @TableField("expire_at")
+    @BizField(name = "expireAt", type = BizField.FieldType.DATETIME)
     private LocalDateTime expireAt;
 
     /**
      * 跳转命中次数.
      */
     @TableField("hits")
+    @BizField(name = "跳转命中次数", type = BizField.FieldType.INTEGER)
     private Long hits;
 
     @TableField("created_at")
+    @BizField(name = "createdAt", type = BizField.FieldType.DATETIME)
     private LocalDateTime createdAt;
 
     @TableField("created_by")
+    @BizField(name = "createdBy", type = BizField.FieldType.STRING)
     private String createdBy;
 
     @TableField("remark")
+    @BizField(name = "remark", type = BizField.FieldType.STRING)
     private String remark;
 
     public Long getId() {
@@ -145,3 +157,6 @@ public class SurlMappingDO implements Serializable {
         this.remark = remark;
     }
 }
+
+
+

@@ -1,5 +1,6 @@
 package com.zifang.z.surl.service.impl;
 
+import com.zifang.z.meta.api.annotation.BizMethod;
 import com.zifang.z.surl.domain.entity.SurlMappingDO;
 import com.zifang.z.surl.domain.service.SurlDbService;
 import com.zifang.z.surl.service.SurlService;
@@ -39,6 +40,7 @@ public class SurlServiceMySqlImpl implements SurlService {
 
     @Override
     @Transactional
+    @BizMethod(name = "shorten", module = "z-surl", description = "", operation = BizMethod.Operation.ACTION)
     public String shorten(String originUrl, String tenantCode, long ttlMillis, String createdBy, String remark) {
         if (originUrl == null || originUrl.isEmpty()) {
             throw new IllegalArgumentException("originUrl must not be empty");
@@ -61,6 +63,7 @@ public class SurlServiceMySqlImpl implements SurlService {
 
     @Override
     @Transactional
+    @BizMethod(name = "resolve", module = "z-surl", description = "", operation = BizMethod.Operation.ACTION)
     public Optional<SurlMappingDO> resolve(String mapKey) {
         if (mapKey == null || mapKey.isEmpty()) {
             return Optional.empty();
@@ -82,6 +85,7 @@ public class SurlServiceMySqlImpl implements SurlService {
     }
 
     @Override
+    @BizMethod(name = "info", module = "z-surl", description = "", operation = BizMethod.Operation.ACTION)
     public Optional<SurlMappingDO> info(String mapKey) {
         if (mapKey == null || mapKey.isEmpty()) {
             return Optional.empty();
@@ -91,6 +95,7 @@ public class SurlServiceMySqlImpl implements SurlService {
 
     @Override
     @Transactional
+    @BizMethod(name = "invalidate", module = "z-surl", description = "", operation = BizMethod.Operation.ACTION)
     public boolean invalidate(String mapKey) {
         if (mapKey == null || mapKey.isEmpty()) {
             return false;
@@ -121,3 +126,6 @@ public class SurlServiceMySqlImpl implements SurlService {
         return sb.toString();
     }
 }
+
+
+
