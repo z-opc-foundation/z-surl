@@ -80,7 +80,12 @@
         <artifactId>z-config-spring-boot-starter</artifactId>
         <version>1.0.12</version>
     </dependency>
-    </dependencies>
+        <dependency>
+            <groupId>io.github.yuku123</groupId>
+            <artifactId>z-meta-starter</artifactId>
+            <version>${z-meta.version}</version>
+        </dependency>
+</dependencies>
 
     <build>
         <plugins>
