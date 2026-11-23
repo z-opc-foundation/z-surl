@@ -3,6 +3,9 @@ import react from '@vitejs/plugin-react'
 import path from 'node:path'
 import {safeEmptyOutDir} from '../../build-tools/safe-vite-plugin.mjs'
 
+const localSiblings = process.env.LOCAL_SIBLINGS === '1'
+const workspaceRoot = path.resolve(__dirname, '../../..')
+
 /**
  * 应用层 = SPA，产物 dist/ 由 z-surl-admin 的 maven-resources-plugin 拷进
  * BOOT-INF/classes/static/（Mode 1 合体）。
@@ -17,16 +20,26 @@ export default defineConfig({
   base: '/',
   resolve: {
     dedupe: ['react', 'react-dom', 'react-router-dom', 'antd', '@ant-design/icons', 'axios'],
-    alias: { '@': path.resolve(__dirname, 'src'), '@fc': path.resolve(__dirname, '../z-surl-component/src/index.ts'), ...(process.env.LOCAL_SIBLINGS === '1' ? { '@yuku123/z-surl-component': '../z-surl-component/src' } : {}) }
+    alias: [
+      { find: '@', replacement: path.resolve(__dirname, 'src') },
+      { find: '@fc', replacement: path.resolve(__dirname, '../z-surl-component/src/index.ts') },
+      ...(localSiblings ? [
+        { find: /^@yuku123\/z-surl-component\/pages$/, replacement: path.resolve(__dirname, '../z-surl-component/src/pages.ts') },
+        { find: /^@yuku123\/z-surl-component$/, replacement: path.resolve(__dirname, '../z-surl-component/src/index.ts') },
+        { find: /^@yuku123\/z-frontend-common\/ui$/, replacement: path.resolve(workspaceRoot, 'z-frontend-common/src/components/ui/index.js') },
+        { find: /^@yuku123\/z-frontend-common$/, replacement: path.resolve(workspaceRoot, 'z-frontend-common/src/index.js') },
+      ] : []),
+    ]
   },
   plugins: [safeEmptyOutDir(), react()],
   server: {
     port: 5174,
     host: '0.0.0.0',
+    fs: { allow: [localSiblings ? workspaceRoot : path.resolve(__dirname, '..')] },
     proxy: {
       // dev 时前端跑在 5174、后端跑在 8080，用 proxy 抹掉跨域
       '/api': { target: 'http://localhost:8080', changeOrigin: true },
-      '/s': { target: 'http://localhost:8080', changeOrigin: true }
+      '/s/': { target: 'http://localhost:8080', changeOrigin: true }
     }
   },
   build: {
